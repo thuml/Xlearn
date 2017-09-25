@@ -1,9 +1,9 @@
 net: "models/JAN/alexnet/train_val.prototxt"
-test_iter: 795
+test_iter: 2817
 test_interval: 500
 base_lr: 0.001
 lr_policy: "inv"
-gamma: 0.003
+gamma: 0.001
 power: 0.75
 display: 500
 max_iter: 30000

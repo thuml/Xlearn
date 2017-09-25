@@ -5,7 +5,7 @@ layer {
   top: "source_data"
   top: "source_label"
   image_data_param {
-    source: "./data/office/amazon_list.txt"
+    source: "./data/office/webcam_list.txt"
     batch_size: 64
     new_height: 256
     new_width: 256
@@ -24,7 +24,7 @@ layer {
   top: "target_data"
   top: "target_label"
   image_data_param {
-    source: "./data/office/webcam_list.txt"
+    source: "./data/office/amazon_list.txt"
     batch_size: 64
     new_height: 256
     new_width: 256
@@ -49,7 +49,7 @@ layer {
   top: "data"
   top: "label"
   image_data_param {
-    source: "./data/office/webcam_list.txt"
+    source: "./data/office/amazon_list.txt"
     batch_size: 1
     new_height: 256
     new_width: 256
