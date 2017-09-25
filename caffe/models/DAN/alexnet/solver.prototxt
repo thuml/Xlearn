@@ -1,0 +1,14 @@
+net: "./models/DAN/alexnet/train_val.prototxt"
+test_iter: 795
+test_interval: 500
+base_lr: 0.001
+lr_policy: "inv"
+gamma: 0.001
+power: 0.75
+momentum: 0.9
+display: 500
+max_iter: 20000
+snapshot: 60000
+snapshot_prefix: "./models/DAN/alexnet/trained_model"
+solver_mode: GPU
+snapshot_after_train: false

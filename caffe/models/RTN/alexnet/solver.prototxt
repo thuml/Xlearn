@@ -1,0 +1,14 @@
+net: "./models/RTN/alexnet/train_val.prototxt"
+test_iter: 2817
+test_interval: 500
+base_lr: 0.001
+momentum: 0.9
+lr_policy: "inv"
+gamma: 0.001
+power: 0.75
+display: 500
+max_iter: 20000
+snapshot: 60000
+snapshot_prefix: "./models/RTN/alexnet/trained_model"
+solver_mode: GPU
+snapshot_after_train: false
