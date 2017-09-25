@@ -78,25 +78,6 @@ void MMDLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
         kernel_gamma *= kernel_mul_;
     }
 
-    //calculate mmd loss
-    /*Dtype loss = 0;*/
-    /*Dtype* kernel_data = kernel_val_[kernel_num_ / 2]->cpu_data();*/
-    /*for(int i = 0;i < source_num_;++i){*/
-        /*for(int j = 0;j < source_num_;++j){*/
-            /*loss += kernel_data[i * total_num_ + j];*/
-        /*}*/
-    /*}*/
-    /*for(int i = 0;i < target_num_;++i){*/
-        /*for(int j = 0;j < target_num_;++j){*/
-            /*loss += kernel_data[(i + source_num_) * total_num_ + source_num_ + j];*/
-        /*}*/
-    /*}*/
-    /*for(int i = 0;i < source_num_;++i){*/
-        /*for(int j = 0;j < target_num_;++j){*/
-            /*loss -= 2 * kernel_data[i * total_num_ + source_num_ + j];*/
-        /*}*/
-    /*}*/
-
     Dtype loss = 0;
     int sample_num = (source_num_ > target_num_) ? source_num_ : target_num_;
     int s1, s2, t1, t2;

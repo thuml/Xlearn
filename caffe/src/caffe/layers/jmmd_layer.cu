@@ -363,28 +363,6 @@ void JMMDLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     
     caffe_gpu_set(source_num_ * dim_, Dtype(0), source_diff);
     caffe_gpu_set(target_num_ * dim_, Dtype(0), target_diff);
-    /*
-    for(int i = 0;i < total_num_;++i){
-        int nthreads = total_num_ * dim_;
-        const Dtype* data = (i >= source_num_) ? 
-            (bottom[1]->gpu_data() + dim_ * (i - source_num_)) : 
-            (bottom[0]->gpu_data() + dim_ * i);
-        
-        Dtype gamma_times = pow(kernel_mul_, (Dtype)(kernel_num_ / 2));
-        Dtype kernel_gamma = gamma_ / gamma_times;
-        
-        for(int j = 0;j < kernel_num_;++j){
-            CalculateDiff<Dtype><<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
-                nthreads, bottom[0]->gpu_data(), bottom[1]->gpu_data(),
-                source_num_, total_num_, dim_, kernel_val_[j]->gpu_data(),
-                kernel_gamma, delta_.gpu_data(), data, i, 
-                bottom[0]->mutable_gpu_diff(), bottom[1]->mutable_gpu_diff());
-            kernel_gamma *= kernel_mul_;
-        }
-    }
-    caffe_gpu_scal(source_num_ * dim_, loss_weight_ / total_num_ / total_num_, bottom[0]->mutable_gpu_diff());
-    caffe_gpu_scal(target_num_ * dim_, loss_weight_ / total_num_ / total_num_, bottom[1]->mutable_gpu_diff());
-    */
     if(source_num_ <= 1 || target_num_ <= 1) return;
     int sample_num = (source_num_ > target_num_) ? source_num_ : target_num_;
     int s1, s2, t1, t2;

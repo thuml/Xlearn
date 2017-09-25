@@ -1,5 +1,5 @@
 net: "models/JAN/resnet/train_val.prototxt"
-test_iter: 795
+test_iter: 2817
 test_interval: 500
 base_lr: 0.0003
 lr_policy: "inv"
