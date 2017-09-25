@@ -411,20 +411,12 @@ message LayerParameter {
 
 // Message that stores parameters used by JMMD layer
 message JMMDParameter {
-    optional uint32 kernel_num = 1 [default = 5];
+    optional uint32 kernel_num = 1 [default = 1];
     optional float kernel_mul = 6[default = 2];
     optional float label_kernel_mul = 4 [default = 2];
-    optional uint32 label_kernel_num = 5 [default = 5];
-    optional float sigma = 2[default = 0];
+    optional uint32 label_kernel_num = 5 [default = 1];
+    optional float sigma = 2[default = 1.0];
     optional bool auto_sigma = 8 [default = false];
-    optional bool fix_gamma = 7 [default = false];
-    optional bool label_back_propagate = 9 [default = false];
-    enum LabelKernelMode {
-      ONE_OF_K_RBF = 0;
-      IDENTIFY = 1;
-      PROB_RBF = 2;
-    }
-    optional LabelKernelMode label_kernel_mode = 3 [default = IDENTIFY];
 }
 
 

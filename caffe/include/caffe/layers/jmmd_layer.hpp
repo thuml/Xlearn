@@ -53,18 +53,13 @@ class JMMDLossLayer : public LossLayer<Dtype> {
   Dtype kernel_mul_;
   Dtype gamma_;
   Dtype sigma_;
-  bool fix_gamma_;
   Blob<Dtype> diff_;
   vector<Blob<Dtype>*> kernel_val_;
   Blob<Dtype> diff_multiplier_;
   Dtype loss_weight_;
-  Dtype label_loss_weight_;
   Blob<Dtype> delta_;
-  JMMDParameter_LabelKernelMode label_kernel_mode_;
   int label_kernel_num_;
   Dtype label_kernel_mul_;
-  bool auto_sigma_;
-  bool label_back_propagate_;
 };
 
 }  // namespace caffe
