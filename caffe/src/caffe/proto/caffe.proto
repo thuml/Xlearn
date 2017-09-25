@@ -415,8 +415,6 @@ message JMMDParameter {
     optional float kernel_mul = 6[default = 2];
     optional float label_kernel_mul = 4 [default = 2];
     optional uint32 label_kernel_num = 5 [default = 1];
-    optional float sigma = 2[default = 1.0];
-    optional bool auto_sigma = 8 [default = false];
 }
 
 

@@ -2484,27 +2484,20 @@ layer {
   include: { phase: TRAIN }
 }
 layer {
-  name: "fc8_mmd_loss"
+  name: "jmmd_loss"
   type: "JMMDLoss"
   bottom: "bottleneck_source"
   bottom: "bottleneck_target"
   bottom: "source_softmax"
   bottom: "target_softmax"
-  bottom: "source_label"
-  loss_weight: 0.3 #best 0.3
-  top: "fc7_mmd_loss"
-  loss_weight: 0.3 #best 0.3
-  top: "label_mmd_loss"
-  jmmd_param {
-    kernel_num: 5
-    kernel_mul: 2.0
-    label_kernel_num: 1
-    label_kernel_mul: 2.0
-    fix_gamma: false
-    sigma: 1.3 #best
-    auto_sigma: false
-    label_kernel_mode: PROB_RBF
-    label_back_propagate: true
-  }
+  loss_weight: 0.3 #best 0.3 for our tasks, can be tuned within [0.1, 1.0]
+  top: "jmmd_loss"
   include: { phase: TRAIN }
+}
+layer {
+  name: "silence_loss_value"
+  type: "Silence"
+  bottom: "jmmd_loss"
+  include: { phase: TRAIN }
+  # we don't calculate jmmd loss value in our code
 }
