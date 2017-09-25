@@ -17,20 +17,29 @@ We have published the Image-Clef dataset we use [here](https://drive.google.com/
 Training Model
 ---------------
 
-In `models/DAN/amazon_to_webcam`, we give an example model based on Alexnet to show how to transfer from `amazon` to `webcam`. In this model, we insert mmd layers after fc7 and fc8 individually.
+In `models/DAN/alexnet`, we give an example model based on Alexnet to show how to transfer from `webcam` to `amazon`. In this model, we insert mmd layers after fc7 and fc8 individually.
 
-The [bvlc\_reference\_caffenet](http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel) is used as the pre-trained model. If the Office dataset and pre-trained caffemodel are prepared, the example can be run with the following command:
+
+In `models/RTN/alexnet`, we give an example model based on Alexnet to show how to transfer from `webcam` to `amazon`. In this model, we insert mmd layers after the outer product of the output of fc7 and fc8.
+
+In `models/JAN/alexnet` and `models/JAN/resnet`, we give an example model based on Alexnet and ResNet respectively to show how to transfer from `webcam` to `amazon`. In this model, we insert jmmd layers with output of fc7 and fc8 as its input.
+
+The [bvlc\_reference\_caffenet](http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel) is used as the pre-trained model for Alexnet. The [deep-residual-networks](https://github.com/KaimingHe/deep-residual-networks) is used as the pre-trained model for Resnet. We use Resnet-50. If the Office dataset and pre-trained caffemodel are prepared, the example can be run with the following command:
 ```
-"./build/tools/caffe train -solver models/DAN/amazon_to_webcam/solver.prototxt -weights models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel"
+Alexnet:
+
+"./build/tools/caffe train -solver models/*/alexnet/solver.prototxt -weights models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel (*=DAN, RTN or JAN)"
 ```
+```
+ResNet:
 
-Resnet pre-trainded model is [here](https://github.com/KaimingHe/deep-residual-networks). We use Resnet-50.
-
-In `models/JAN`, we give example models based on Alexnet and Resnet to show how to transfer from `amazon` to `webcam`, according to "Deep Transfer Learning with Joint Adaptation Networks". The shell scripts to train JAN model are the same with the above command, except that the paths of `solver.prototxt` and pretrained `caffemodel` are different.
-
-As JAN uses the joint distribution of features (e.g. fc7) and softmax output (fc8) which are randomized at the beginning of training, one should stablize training by adding `grl layer` before `JMMD Loss Layer` to increase the loss weight from zero gradually, as suggested in the `train_val.prototxt`. 
+"./build/tools/caffe train -solver models/JAN/resnet/solver.prototxt -weights models/deep-residual-networks/ResNet-50-model.caffemodel"
+```
 
 Parameter Tuning
 ---------------
 In mmd-layer and jmmd-layer, parameter `loss_weight` can be tuned to give mmd/jmmd loss different weights.
 
+Task Change
+---------------
+If you want to change the transfer task like change to `amazon` to `dslr`. You need to modify the corresponding `train_val.prototxt` to change the source and target dataset. And you need to change the `test_iter` parameter corresponding `solver.prototxt` to the size of the target dataset: `2817` for `amazon`, `795` for `webcam` and `498` for `dslr`. 
