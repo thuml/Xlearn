@@ -36,6 +36,8 @@ ResNet:
 "./build/tools/caffe train -solver models/JAN/resnet/solver.prototxt -weights models/deep-residual-networks/ResNet-50-model.caffemodel"
 ```
 
+### Since finetuning ResNet on caffe needs too much memory for one gpu to hold, we don't finetune this model. 
+
 Parameter Tuning
 ---------------
 In mmd-layer and jmmd-layer, parameter `loss_weight` can be tuned to give mmd/jmmd loss different weights.
