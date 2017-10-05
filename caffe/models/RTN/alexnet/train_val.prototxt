@@ -1,4 +1,4 @@
-name: "outer_product_amazon_to_webcam"
+name: "webcam_to_amazon"
 layer {
   name: "source_data"
   type: "ImageData"
