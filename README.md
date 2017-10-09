@@ -19,7 +19,7 @@ We have published the Image-Clef dataset we use [here](https://drive.google.com/
 ## Citation
 If you use this code for your research, please consider citing:<br>
 ```
-@inproceedings{DBLP:conf/icml/LongC0J15,
+    @inproceedings{DBLP:conf/icml/LongC0J15,
       author    = {Mingsheng Long and
                    Yue Cao and
                    Jianmin Wang and
