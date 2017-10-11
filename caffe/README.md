@@ -1,4 +1,4 @@
-# transfer-caffe
+# Xlearn on Caffe
 
 This is a caffe repository for transfer learning. We fork the repository with version ID `29cdee7` from [Caffe](https://github.com/BVLC/caffe) and make our modifications. The main modifications are listed as follow:
 
@@ -35,6 +35,8 @@ ResNet:
 
 "./build/tools/caffe train -solver models/JAN/resnet/solver.prototxt -weights models/deep-residual-networks/ResNet-50-model.caffemodel"
 ```
+
+### Since finetuning ResNet on caffe needs too much memory for one gpu to hold, we don't finetune ResNet. 
 
 Parameter Tuning
 ---------------
