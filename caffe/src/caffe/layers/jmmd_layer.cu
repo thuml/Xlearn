@@ -193,6 +193,7 @@ template <typename Dtype>
 void JMMDLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down,
     const vector<Blob<Dtype>*>& bottom) {
+  if (train_iter_num_ >= 0){
     Dtype* source_diff = bottom[0]->mutable_gpu_diff();
     Dtype* target_diff = bottom[1]->mutable_gpu_diff();
     Dtype* label_source_diff = bottom[2]->mutable_gpu_diff();
@@ -339,6 +340,7 @@ void JMMDLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         caffe_gpu_add(label_dim, tempY1, label_target_diff + t1 * label_dim, label_target_diff + t1 * label_dim);
         caffe_gpu_add(label_dim, tempY2, label_target_diff + t2 * label_dim, label_target_diff + t2 * label_dim);
     }
+  }
 }
 
 INSTANTIATE_LAYER_GPU_FUNCS(JMMDLossLayer);

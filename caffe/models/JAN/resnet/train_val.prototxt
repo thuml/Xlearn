@@ -5,7 +5,7 @@ layer {
   top: "source_data"
   top: "source_label"
   image_data_param {
-    source: "./data/office/webcam_list.txt"
+    source: "./data/office/amazon_list.txt"
     batch_size: 16
     new_height: 224
     new_width: 224
@@ -24,7 +24,7 @@ layer {
   top: "target_data"
   top: "target_label"
   image_data_param {
-    source: "./data/office/amazon_list.txt"
+    source: "./data/office/webcam_list.txt"
     batch_size: 16
     new_height: 224
     new_width: 224
@@ -49,7 +49,7 @@ layer {
   top: "data"
   top: "label"
   image_data_param {
-    source: "./data/office/amazon_list.txt"
+    source: "./data/office/webcam_list.txt"
     batch_size: 1
     new_height: 224
     new_width: 224
@@ -2400,7 +2400,7 @@ layer {
   type: "InnerProduct"
   bottom: "bottleneck"
   top: "fc8"
-  # blobs_lr is set to higher than for other layers, because this layer is starting from random while the others are already trained
+  # blobs_lr is set higher than for other layers, as this layer is trained from random weights while the others are fine-tuned
   param {
     lr_mult: 1
     decay_mult: 1
@@ -2490,7 +2490,7 @@ layer {
   bottom: "bottleneck_target"
   bottom: "source_softmax"
   bottom: "target_softmax"
-  loss_weight: 0.3 #best 0.3 for our tasks, can be tuned within [0.1, 1.0]
+  loss_weight: 0.3 # best 0.3 for our tasks, can be tuned within [0.1, 1.0]
   top: "jmmd_loss"
   include: { phase: TRAIN }
 }
@@ -2499,5 +2499,4 @@ layer {
   type: "Silence"
   bottom: "jmmd_loss"
   include: { phase: TRAIN }
-  # we don't calculate jmmd loss value in our code
 }

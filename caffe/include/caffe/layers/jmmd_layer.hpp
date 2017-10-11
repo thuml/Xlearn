@@ -60,6 +60,7 @@ class JMMDLossLayer : public LossLayer<Dtype> {
   Blob<Dtype> delta_;
   int label_kernel_num_;
   Dtype label_kernel_mul_;
+  int train_iter_num_;
 };
 
 }  // namespace caffe

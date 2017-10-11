@@ -1,0 +1,2381 @@
+nohup: ignoring input
+I1008 12:23:32.794870 55935 caffe.cpp:217] Using GPUs 0
+I1008 12:23:32.886624 55935 caffe.cpp:222] GPU 0: TITAN X (Pascal)
+I1008 12:23:33.631074 55935 solver.cpp:49] Initializing solver from parameters: 
+test_iter: 2817
+test_interval: 500
+base_lr: 0.001
+display: 500
+max_iter: 30000
+lr_policy: "inv"
+gamma: 0.001
+power: 0.75
+momentum: 0.9
+weight_decay: 0.0005
+snapshot: 60000
+snapshot_prefix: "models/JAN/alexnet/trained_model"
+solver_mode: GPU
+device_id: 0
+net: "models/JAN/alexnet/train_val.prototxt"
+train_state {
+  level: 0
+  stage: ""
+}
+snapshot_after_train: false
+I1008 12:23:33.631245 55935 solver.cpp:92] Creating training net from net file: models/JAN/alexnet/train_val.prototxt
+I1008 12:23:33.632148 55935 net.cpp:322] The NetState phase (0) differed from the phase (1) specified by a rule in layer test_data
+I1008 12:23:33.632180 55935 net.cpp:322] The NetState phase (0) differed from the phase (1) specified by a rule in layer accuracy
+I1008 12:23:33.632508 55935 net.cpp:58] Initializing net from parameters: 
+name: "amazon_to_webcam"
+state {
+  phase: TRAIN
+  level: 0
+  stage: ""
+}
+layer {
+  name: "source_data"
+  type: "ImageData"
+  top: "source_data"
+  top: "source_label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mirror: true
+    crop_size: 227
+    mean_file: "./data/ilsvrc12/imagenet_mean.binaryproto"
+  }
+  image_data_param {
+    source: "./data/office/dslr_list.txt"
+    batch_size: 64
+    shuffle: true
+    new_height: 256
+    new_width: 256
+  }
+}
+layer {
+  name: "target_data"
+  type: "ImageData"
+  top: "target_data"
+  top: "target_label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mirror: true
+    crop_size: 227
+    mean_file: "./data/ilsvrc12/imagenet_mean.binaryproto"
+  }
+  image_data_param {
+    source: "./data/office/amazon_list.txt"
+    batch_size: 64
+    shuffle: true
+    new_height: 256
+    new_width: 256
+  }
+}
+layer {
+  name: "target_label_silence"
+  type: "Silence"
+  bottom: "target_label"
+  include {
+    phase: TRAIN
+  }
+}
+layer {
+  name: "data"
+  type: "Concat"
+  bottom: "source_data"
+  bottom: "target_data"
+  top: "data"
+  include {
+    phase: TRAIN
+  }
+  concat_param {
+    axis: 0
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 96
+    kernel_size: 11
+    stride: 4
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "pool1"
+  type: "Pooling"
+  bottom: "conv1"
+  top: "pool1"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: "norm1"
+  type: "LRN"
+  bottom: "pool1"
+  top: "norm1"
+  lrn_param {
+    local_size: 5
+    alpha: 0.0001
+    beta: 0.75
+  }
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "norm1"
+  top: "conv2"
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 2
+    kernel_size: 5
+    group: 2
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+layer {
+  name: "relu2"
+  type: "ReLU"
+  bottom: "conv2"
+  top: "conv2"
+}
+layer {
+  name: "pool2"
+  type: "Pooling"
+  bottom: "conv2"
+  top: "pool2"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: "norm2"
+  type: "LRN"
+  bottom: "pool2"
+  top: "norm2"
+  lrn_param {
+    local_size: 5
+    alpha: 0.0001
+    beta: 0.75
+  }
+}
+layer {
+  name: "conv3"
+  type: "Convolution"
+  bottom: "norm2"
+  top: "conv3"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 384
+    pad: 1
+    kernel_size: 3
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu3"
+  type: "ReLU"
+  bottom: "conv3"
+  top: "conv3"
+}
+layer {
+  name: "conv4"
+  type: "Convolution"
+  bottom: "conv3"
+  top: "conv4"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 384
+    pad: 1
+    kernel_size: 3
+    group: 2
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+layer {
+  name: "relu4"
+  type: "ReLU"
+  bottom: "conv4"
+  top: "conv4"
+}
+layer {
+  name: "conv5"
+  type: "Convolution"
+  bottom: "conv4"
+  top: "conv5"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 1
+    kernel_size: 3
+    group: 2
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+layer {
+  name: "relu5"
+  type: "ReLU"
+  bottom: "conv5"
+  top: "conv5"
+}
+layer {
+  name: "pool5"
+  type: "Pooling"
+  bottom: "conv5"
+  top: "pool5"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: "fc6"
+  type: "InnerProduct"
+  bottom: "pool5"
+  top: "fc6"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 4096
+    weight_filler {
+      type: "gaussian"
+      std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+layer {
+  name: "relu6"
+  type: "ReLU"
+  bottom: "fc6"
+  top: "fc6"
+}
+layer {
+  name: "drop6"
+  type: "Dropout"
+  bottom: "fc6"
+  top: "fc6"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc7"
+  type: "InnerProduct"
+  bottom: "fc6"
+  top: "fc7"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 4096
+    weight_filler {
+      type: "gaussian"
+      std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+layer {
+  name: "relu7"
+  type: "ReLU"
+  bottom: "fc7"
+  top: "fc7"
+}
+layer {
+  name: "drop7"
+  type: "Dropout"
+  bottom: "fc7"
+  top: "fc7"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc8_new"
+  type: "InnerProduct"
+  bottom: "fc7"
+  top: "fc8"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 31
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "slice_fc7"
+  type: "Slice"
+  bottom: "fc7"
+  top: "fc7_source"
+  top: "fc7_target"
+  include {
+    phase: TRAIN
+  }
+  slice_param {
+    slice_dim: 0
+  }
+}
+layer {
+  name: "slice_fc8"
+  type: "Slice"
+  bottom: "fc8"
+  top: "fc8_source"
+  top: "fc8_target"
+  include {
+    phase: TRAIN
+  }
+  slice_param {
+    slice_dim: 0
+  }
+}
+layer {
+  name: "silence"
+  type: "Silence"
+  bottom: "fc8_target"
+  include {
+    phase: TRAIN
+  }
+}
+layer {
+  name: "softmax_loss"
+  type: "SoftmaxWithLoss"
+  bottom: "fc8_source"
+  bottom: "source_label"
+  top: "softmax_loss"
+  include {
+    phase: TRAIN
+  }
+}
+layer {
+  name: "fc8_softmax"
+  type: "Softmax"
+  bottom: "fc8"
+  top: "fc8_softmax"
+  include {
+    phase: TRAIN
+  }
+}
+layer {
+  name: "slice_softmax"
+  type: "Slice"
+  bottom: "fc8_softmax"
+  top: "source_softmax"
+  top: "target_softmax"
+  include {
+    phase: TRAIN
+  }
+  slice_param {
+    slice_dim: 0
+  }
+}
+layer {
+  name: "jmmd_loss_fc7"
+  type: "JMMDLoss"
+  bottom: "fc7_source"
+  bottom: "fc7_target"
+  bottom: "source_softmax"
+  bottom: "target_softmax"
+  top: "jmmd_loss_fc7"
+  loss_weight: 0.3
+  include {
+    phase: TRAIN
+  }
+}
+layer {
+  name: "jmmd_loss_softmax"
+  type: "JMMDLoss"
+  bottom: "source_softmax"
+  bottom: "target_softmax"
+  bottom: "source_softmax"
+  bottom: "target_softmax"
+  top: "jmmd_loss_softmax"
+  loss_weight: 0.3
+  include {
+    phase: TRAIN
+  }
+}
+layer {
+  name: "silence_loss_value"
+  type: "Silence"
+  bottom: "jmmd_loss_fc7"
+  bottom: "jmmd_loss_softmax"
+  include {
+    phase: TRAIN
+  }
+}
+I1008 12:23:33.632756 55935 layer_factory.hpp:77] Creating layer source_data
+I1008 12:23:33.632800 55935 net.cpp:100] Creating Layer source_data
+I1008 12:23:33.632817 55935 net.cpp:408] source_data -> source_data
+I1008 12:23:33.632841 55935 net.cpp:408] source_data -> source_label
+I1008 12:23:33.632856 55935 data_transformer.cpp:25] Loading mean file from: ./data/ilsvrc12/imagenet_mean.binaryproto
+I1008 12:23:33.661975 55935 image_data_layer.cpp:38] Opening file ./data/office/dslr_list.txt
+I1008 12:23:33.662174 55935 image_data_layer.cpp:53] Shuffling data
+I1008 12:23:33.662216 55935 image_data_layer.cpp:58] A total of 498 images.
+I1008 12:23:34.175912 55935 image_data_layer.cpp:85] output data size: 64,3,227,227
+I1008 12:23:34.267448 55935 net.cpp:150] Setting up source_data
+I1008 12:23:34.267514 55935 net.cpp:157] Top shape: 64 3 227 227 (9893568)
+I1008 12:23:34.267523 55935 net.cpp:157] Top shape: 64 (64)
+I1008 12:23:34.267526 55935 net.cpp:165] Memory required for data: 39574528
+I1008 12:23:34.267540 55935 layer_factory.hpp:77] Creating layer target_data
+I1008 12:23:34.267583 55935 net.cpp:100] Creating Layer target_data
+I1008 12:23:34.267593 55935 net.cpp:408] target_data -> target_data
+I1008 12:23:34.267613 55935 net.cpp:408] target_data -> target_label
+I1008 12:23:34.267623 55935 data_transformer.cpp:25] Loading mean file from: ./data/ilsvrc12/imagenet_mean.binaryproto
+I1008 12:23:34.269002 55935 image_data_layer.cpp:38] Opening file ./data/office/amazon_list.txt
+I1008 12:23:34.269891 55935 image_data_layer.cpp:53] Shuffling data
+I1008 12:23:34.270090 55935 image_data_layer.cpp:58] A total of 2817 images.
+I1008 12:23:34.271452 55935 image_data_layer.cpp:85] output data size: 64,3,227,227
+I1008 12:23:34.360146 55935 net.cpp:150] Setting up target_data
+I1008 12:23:34.360188 55935 net.cpp:157] Top shape: 64 3 227 227 (9893568)
+I1008 12:23:34.360195 55935 net.cpp:157] Top shape: 64 (64)
+I1008 12:23:34.360199 55935 net.cpp:165] Memory required for data: 79149056
+I1008 12:23:34.360210 55935 layer_factory.hpp:77] Creating layer target_label_silence
+I1008 12:23:34.360229 55935 net.cpp:100] Creating Layer target_label_silence
+I1008 12:23:34.360237 55935 net.cpp:434] target_label_silence <- target_label
+I1008 12:23:34.360255 55935 net.cpp:150] Setting up target_label_silence
+I1008 12:23:34.360260 55935 net.cpp:165] Memory required for data: 79149056
+I1008 12:23:34.360265 55935 layer_factory.hpp:77] Creating layer data
+I1008 12:23:34.360278 55935 net.cpp:100] Creating Layer data
+I1008 12:23:34.360282 55935 net.cpp:434] data <- source_data
+I1008 12:23:34.360290 55935 net.cpp:434] data <- target_data
+I1008 12:23:34.360297 55935 net.cpp:408] data -> data
+I1008 12:23:34.360409 55935 net.cpp:150] Setting up data
+I1008 12:23:34.360420 55935 net.cpp:157] Top shape: 128 3 227 227 (19787136)
+I1008 12:23:34.360425 55935 net.cpp:165] Memory required for data: 158297600
+I1008 12:23:34.360430 55935 layer_factory.hpp:77] Creating layer conv1
+I1008 12:23:34.360452 55935 net.cpp:100] Creating Layer conv1
+I1008 12:23:34.360457 55935 net.cpp:434] conv1 <- data
+I1008 12:23:34.360466 55935 net.cpp:408] conv1 -> conv1
+I1008 12:23:34.366019 55935 net.cpp:150] Setting up conv1
+I1008 12:23:34.366040 55935 net.cpp:157] Top shape: 128 96 55 55 (37171200)
+I1008 12:23:34.366045 55935 net.cpp:165] Memory required for data: 306982400
+I1008 12:23:34.366065 55935 layer_factory.hpp:77] Creating layer relu1
+I1008 12:23:34.366078 55935 net.cpp:100] Creating Layer relu1
+I1008 12:23:34.366083 55935 net.cpp:434] relu1 <- conv1
+I1008 12:23:34.366091 55935 net.cpp:395] relu1 -> conv1 (in-place)
+I1008 12:23:34.366101 55935 net.cpp:150] Setting up relu1
+I1008 12:23:34.366106 55935 net.cpp:157] Top shape: 128 96 55 55 (37171200)
+I1008 12:23:34.366111 55935 net.cpp:165] Memory required for data: 455667200
+I1008 12:23:34.366114 55935 layer_factory.hpp:77] Creating layer pool1
+I1008 12:23:34.366125 55935 net.cpp:100] Creating Layer pool1
+I1008 12:23:34.366129 55935 net.cpp:434] pool1 <- conv1
+I1008 12:23:34.366135 55935 net.cpp:408] pool1 -> pool1
+I1008 12:23:34.366185 55935 net.cpp:150] Setting up pool1
+I1008 12:23:34.366214 55935 net.cpp:157] Top shape: 128 96 27 27 (8957952)
+I1008 12:23:34.366231 55935 net.cpp:165] Memory required for data: 491499008
+I1008 12:23:34.366236 55935 layer_factory.hpp:77] Creating layer norm1
+I1008 12:23:34.366245 55935 net.cpp:100] Creating Layer norm1
+I1008 12:23:34.366250 55935 net.cpp:434] norm1 <- pool1
+I1008 12:23:34.366256 55935 net.cpp:408] norm1 -> norm1
+I1008 12:23:34.366292 55935 net.cpp:150] Setting up norm1
+I1008 12:23:34.366299 55935 net.cpp:157] Top shape: 128 96 27 27 (8957952)
+I1008 12:23:34.366304 55935 net.cpp:165] Memory required for data: 527330816
+I1008 12:23:34.366307 55935 layer_factory.hpp:77] Creating layer conv2
+I1008 12:23:34.366322 55935 net.cpp:100] Creating Layer conv2
+I1008 12:23:34.366327 55935 net.cpp:434] conv2 <- norm1
+I1008 12:23:34.366334 55935 net.cpp:408] conv2 -> conv2
+I1008 12:23:34.377591 55935 net.cpp:150] Setting up conv2
+I1008 12:23:34.377611 55935 net.cpp:157] Top shape: 128 256 27 27 (23887872)
+I1008 12:23:34.377616 55935 net.cpp:165] Memory required for data: 622882304
+I1008 12:23:34.377629 55935 layer_factory.hpp:77] Creating layer relu2
+I1008 12:23:34.377640 55935 net.cpp:100] Creating Layer relu2
+I1008 12:23:34.377645 55935 net.cpp:434] relu2 <- conv2
+I1008 12:23:34.377651 55935 net.cpp:395] relu2 -> conv2 (in-place)
+I1008 12:23:34.377660 55935 net.cpp:150] Setting up relu2
+I1008 12:23:34.377665 55935 net.cpp:157] Top shape: 128 256 27 27 (23887872)
+I1008 12:23:34.377670 55935 net.cpp:165] Memory required for data: 718433792
+I1008 12:23:34.377673 55935 layer_factory.hpp:77] Creating layer pool2
+I1008 12:23:34.377682 55935 net.cpp:100] Creating Layer pool2
+I1008 12:23:34.377686 55935 net.cpp:434] pool2 <- conv2
+I1008 12:23:34.377691 55935 net.cpp:408] pool2 -> pool2
+I1008 12:23:34.377732 55935 net.cpp:150] Setting up pool2
+I1008 12:23:34.377739 55935 net.cpp:157] Top shape: 128 256 13 13 (5537792)
+I1008 12:23:34.377743 55935 net.cpp:165] Memory required for data: 740584960
+I1008 12:23:34.377746 55935 layer_factory.hpp:77] Creating layer norm2
+I1008 12:23:34.377755 55935 net.cpp:100] Creating Layer norm2
+I1008 12:23:34.377760 55935 net.cpp:434] norm2 <- pool2
+I1008 12:23:34.377768 55935 net.cpp:408] norm2 -> norm2
+I1008 12:23:34.377800 55935 net.cpp:150] Setting up norm2
+I1008 12:23:34.377806 55935 net.cpp:157] Top shape: 128 256 13 13 (5537792)
+I1008 12:23:34.377810 55935 net.cpp:165] Memory required for data: 762736128
+I1008 12:23:34.377815 55935 layer_factory.hpp:77] Creating layer conv3
+I1008 12:23:34.377826 55935 net.cpp:100] Creating Layer conv3
+I1008 12:23:34.377830 55935 net.cpp:434] conv3 <- norm2
+I1008 12:23:34.377838 55935 net.cpp:408] conv3 -> conv3
+I1008 12:23:34.402691 55935 net.cpp:150] Setting up conv3
+I1008 12:23:34.402729 55935 net.cpp:157] Top shape: 128 384 13 13 (8306688)
+I1008 12:23:34.402734 55935 net.cpp:165] Memory required for data: 795962880
+I1008 12:23:34.402746 55935 layer_factory.hpp:77] Creating layer relu3
+I1008 12:23:34.402755 55935 net.cpp:100] Creating Layer relu3
+I1008 12:23:34.402760 55935 net.cpp:434] relu3 <- conv3
+I1008 12:23:34.402766 55935 net.cpp:395] relu3 -> conv3 (in-place)
+I1008 12:23:34.402776 55935 net.cpp:150] Setting up relu3
+I1008 12:23:34.402781 55935 net.cpp:157] Top shape: 128 384 13 13 (8306688)
+I1008 12:23:34.402784 55935 net.cpp:165] Memory required for data: 829189632
+I1008 12:23:34.402788 55935 layer_factory.hpp:77] Creating layer conv4
+I1008 12:23:34.402801 55935 net.cpp:100] Creating Layer conv4
+I1008 12:23:34.402804 55935 net.cpp:434] conv4 <- conv3
+I1008 12:23:34.402812 55935 net.cpp:408] conv4 -> conv4
+I1008 12:23:34.421169 55935 net.cpp:150] Setting up conv4
+I1008 12:23:34.421187 55935 net.cpp:157] Top shape: 128 384 13 13 (8306688)
+I1008 12:23:34.421192 55935 net.cpp:165] Memory required for data: 862416384
+I1008 12:23:34.421200 55935 layer_factory.hpp:77] Creating layer relu4
+I1008 12:23:34.421208 55935 net.cpp:100] Creating Layer relu4
+I1008 12:23:34.421213 55935 net.cpp:434] relu4 <- conv4
+I1008 12:23:34.421221 55935 net.cpp:395] relu4 -> conv4 (in-place)
+I1008 12:23:34.421243 55935 net.cpp:150] Setting up relu4
+I1008 12:23:34.421249 55935 net.cpp:157] Top shape: 128 384 13 13 (8306688)
+I1008 12:23:34.421267 55935 net.cpp:165] Memory required for data: 895643136
+I1008 12:23:34.421272 55935 layer_factory.hpp:77] Creating layer conv5
+I1008 12:23:34.421288 55935 net.cpp:100] Creating Layer conv5
+I1008 12:23:34.421291 55935 net.cpp:434] conv5 <- conv4
+I1008 12:23:34.421299 55935 net.cpp:408] conv5 -> conv5
+I1008 12:23:34.434278 55935 net.cpp:150] Setting up conv5
+I1008 12:23:34.434295 55935 net.cpp:157] Top shape: 128 256 13 13 (5537792)
+I1008 12:23:34.434300 55935 net.cpp:165] Memory required for data: 917794304
+I1008 12:23:34.434311 55935 layer_factory.hpp:77] Creating layer relu5
+I1008 12:23:34.434319 55935 net.cpp:100] Creating Layer relu5
+I1008 12:23:34.434324 55935 net.cpp:434] relu5 <- conv5
+I1008 12:23:34.434330 55935 net.cpp:395] relu5 -> conv5 (in-place)
+I1008 12:23:34.434339 55935 net.cpp:150] Setting up relu5
+I1008 12:23:34.434345 55935 net.cpp:157] Top shape: 128 256 13 13 (5537792)
+I1008 12:23:34.434348 55935 net.cpp:165] Memory required for data: 939945472
+I1008 12:23:34.434352 55935 layer_factory.hpp:77] Creating layer pool5
+I1008 12:23:34.434363 55935 net.cpp:100] Creating Layer pool5
+I1008 12:23:34.434367 55935 net.cpp:434] pool5 <- conv5
+I1008 12:23:34.434373 55935 net.cpp:408] pool5 -> pool5
+I1008 12:23:34.434411 55935 net.cpp:150] Setting up pool5
+I1008 12:23:34.434418 55935 net.cpp:157] Top shape: 128 256 6 6 (1179648)
+I1008 12:23:34.434422 55935 net.cpp:165] Memory required for data: 944664064
+I1008 12:23:34.434425 55935 layer_factory.hpp:77] Creating layer fc6
+I1008 12:23:34.434435 55935 net.cpp:100] Creating Layer fc6
+I1008 12:23:34.434440 55935 net.cpp:434] fc6 <- pool5
+I1008 12:23:34.434448 55935 net.cpp:408] fc6 -> fc6
+I1008 12:23:35.313347 55935 net.cpp:150] Setting up fc6
+I1008 12:23:35.313385 55935 net.cpp:157] Top shape: 128 4096 (524288)
+I1008 12:23:35.313390 55935 net.cpp:165] Memory required for data: 946761216
+I1008 12:23:35.313400 55935 layer_factory.hpp:77] Creating layer relu6
+I1008 12:23:35.313418 55935 net.cpp:100] Creating Layer relu6
+I1008 12:23:35.313423 55935 net.cpp:434] relu6 <- fc6
+I1008 12:23:35.313431 55935 net.cpp:395] relu6 -> fc6 (in-place)
+I1008 12:23:35.313442 55935 net.cpp:150] Setting up relu6
+I1008 12:23:35.313446 55935 net.cpp:157] Top shape: 128 4096 (524288)
+I1008 12:23:35.313450 55935 net.cpp:165] Memory required for data: 948858368
+I1008 12:23:35.313454 55935 layer_factory.hpp:77] Creating layer drop6
+I1008 12:23:35.313463 55935 net.cpp:100] Creating Layer drop6
+I1008 12:23:35.313467 55935 net.cpp:434] drop6 <- fc6
+I1008 12:23:35.313472 55935 net.cpp:395] drop6 -> fc6 (in-place)
+I1008 12:23:35.313494 55935 net.cpp:150] Setting up drop6
+I1008 12:23:35.313499 55935 net.cpp:157] Top shape: 128 4096 (524288)
+I1008 12:23:35.313503 55935 net.cpp:165] Memory required for data: 950955520
+I1008 12:23:35.313506 55935 layer_factory.hpp:77] Creating layer fc7
+I1008 12:23:35.313514 55935 net.cpp:100] Creating Layer fc7
+I1008 12:23:35.313519 55935 net.cpp:434] fc7 <- fc6
+I1008 12:23:35.313524 55935 net.cpp:408] fc7 -> fc7
+I1008 12:23:35.687625 55935 net.cpp:150] Setting up fc7
+I1008 12:23:35.687664 55935 net.cpp:157] Top shape: 128 4096 (524288)
+I1008 12:23:35.687669 55935 net.cpp:165] Memory required for data: 953052672
+I1008 12:23:35.687680 55935 layer_factory.hpp:77] Creating layer relu7
+I1008 12:23:35.687697 55935 net.cpp:100] Creating Layer relu7
+I1008 12:23:35.687705 55935 net.cpp:434] relu7 <- fc7
+I1008 12:23:35.687712 55935 net.cpp:395] relu7 -> fc7 (in-place)
+I1008 12:23:35.687723 55935 net.cpp:150] Setting up relu7
+I1008 12:23:35.687727 55935 net.cpp:157] Top shape: 128 4096 (524288)
+I1008 12:23:35.687731 55935 net.cpp:165] Memory required for data: 955149824
+I1008 12:23:35.687734 55935 layer_factory.hpp:77] Creating layer drop7
+I1008 12:23:35.687743 55935 net.cpp:100] Creating Layer drop7
+I1008 12:23:35.687747 55935 net.cpp:434] drop7 <- fc7
+I1008 12:23:35.687752 55935 net.cpp:395] drop7 -> fc7 (in-place)
+I1008 12:23:35.687785 55935 net.cpp:150] Setting up drop7
+I1008 12:23:35.687791 55935 net.cpp:157] Top shape: 128 4096 (524288)
+I1008 12:23:35.687808 55935 net.cpp:165] Memory required for data: 957246976
+I1008 12:23:35.687813 55935 layer_factory.hpp:77] Creating layer fc7_drop7_0_split
+I1008 12:23:35.687819 55935 net.cpp:100] Creating Layer fc7_drop7_0_split
+I1008 12:23:35.687822 55935 net.cpp:434] fc7_drop7_0_split <- fc7
+I1008 12:23:35.687827 55935 net.cpp:408] fc7_drop7_0_split -> fc7_drop7_0_split_0
+I1008 12:23:35.687836 55935 net.cpp:408] fc7_drop7_0_split -> fc7_drop7_0_split_1
+I1008 12:23:35.687865 55935 net.cpp:150] Setting up fc7_drop7_0_split
+I1008 12:23:35.687871 55935 net.cpp:157] Top shape: 128 4096 (524288)
+I1008 12:23:35.687875 55935 net.cpp:157] Top shape: 128 4096 (524288)
+I1008 12:23:35.687880 55935 net.cpp:165] Memory required for data: 961441280
+I1008 12:23:35.687882 55935 layer_factory.hpp:77] Creating layer fc8_new
+I1008 12:23:35.687891 55935 net.cpp:100] Creating Layer fc8_new
+I1008 12:23:35.687896 55935 net.cpp:434] fc8_new <- fc7_drop7_0_split_0
+I1008 12:23:35.687901 55935 net.cpp:408] fc8_new -> fc8
+I1008 12:23:35.690585 55935 net.cpp:150] Setting up fc8_new
+I1008 12:23:35.690593 55935 net.cpp:157] Top shape: 128 31 (3968)
+I1008 12:23:35.690598 55935 net.cpp:165] Memory required for data: 961457152
+I1008 12:23:35.690603 55935 layer_factory.hpp:77] Creating layer fc8_fc8_new_0_split
+I1008 12:23:35.690609 55935 net.cpp:100] Creating Layer fc8_fc8_new_0_split
+I1008 12:23:35.690613 55935 net.cpp:434] fc8_fc8_new_0_split <- fc8
+I1008 12:23:35.690618 55935 net.cpp:408] fc8_fc8_new_0_split -> fc8_fc8_new_0_split_0
+I1008 12:23:35.690624 55935 net.cpp:408] fc8_fc8_new_0_split -> fc8_fc8_new_0_split_1
+I1008 12:23:35.690646 55935 net.cpp:150] Setting up fc8_fc8_new_0_split
+I1008 12:23:35.690652 55935 net.cpp:157] Top shape: 128 31 (3968)
+I1008 12:23:35.690655 55935 net.cpp:157] Top shape: 128 31 (3968)
+I1008 12:23:35.690659 55935 net.cpp:165] Memory required for data: 961488896
+I1008 12:23:35.690662 55935 layer_factory.hpp:77] Creating layer slice_fc7
+I1008 12:23:35.690672 55935 net.cpp:100] Creating Layer slice_fc7
+I1008 12:23:35.690675 55935 net.cpp:434] slice_fc7 <- fc7_drop7_0_split_1
+I1008 12:23:35.690681 55935 net.cpp:408] slice_fc7 -> fc7_source
+I1008 12:23:35.690690 55935 net.cpp:408] slice_fc7 -> fc7_target
+I1008 12:23:35.690717 55935 net.cpp:150] Setting up slice_fc7
+I1008 12:23:35.690722 55935 net.cpp:157] Top shape: 64 4096 (262144)
+I1008 12:23:35.690727 55935 net.cpp:157] Top shape: 64 4096 (262144)
+I1008 12:23:35.690729 55935 net.cpp:165] Memory required for data: 963586048
+I1008 12:23:35.690733 55935 layer_factory.hpp:77] Creating layer slice_fc8
+I1008 12:23:35.690738 55935 net.cpp:100] Creating Layer slice_fc8
+I1008 12:23:35.690743 55935 net.cpp:434] slice_fc8 <- fc8_fc8_new_0_split_0
+I1008 12:23:35.690747 55935 net.cpp:408] slice_fc8 -> fc8_source
+I1008 12:23:35.690753 55935 net.cpp:408] slice_fc8 -> fc8_target
+I1008 12:23:35.690793 55935 net.cpp:150] Setting up slice_fc8
+I1008 12:23:35.690800 55935 net.cpp:157] Top shape: 64 31 (1984)
+I1008 12:23:35.690804 55935 net.cpp:157] Top shape: 64 31 (1984)
+I1008 12:23:35.690806 55935 net.cpp:165] Memory required for data: 963601920
+I1008 12:23:35.690810 55935 layer_factory.hpp:77] Creating layer silence
+I1008 12:23:35.691606 55935 net.cpp:100] Creating Layer silence
+I1008 12:23:35.691613 55935 net.cpp:434] silence <- fc8_target
+I1008 12:23:35.691618 55935 net.cpp:150] Setting up silence
+I1008 12:23:35.691622 55935 net.cpp:165] Memory required for data: 963601920
+I1008 12:23:35.691625 55935 layer_factory.hpp:77] Creating layer softmax_loss
+I1008 12:23:35.691633 55935 net.cpp:100] Creating Layer softmax_loss
+I1008 12:23:35.691637 55935 net.cpp:434] softmax_loss <- fc8_source
+I1008 12:23:35.691642 55935 net.cpp:434] softmax_loss <- source_label
+I1008 12:23:35.691648 55935 net.cpp:408] softmax_loss -> softmax_loss
+I1008 12:23:35.691656 55935 layer_factory.hpp:77] Creating layer softmax_loss
+I1008 12:23:35.691732 55935 net.cpp:150] Setting up softmax_loss
+I1008 12:23:35.691746 55935 net.cpp:157] Top shape: (1)
+I1008 12:23:35.691751 55935 net.cpp:160]     with loss weight 1
+I1008 12:23:35.691778 55935 net.cpp:165] Memory required for data: 963601924
+I1008 12:23:35.691782 55935 layer_factory.hpp:77] Creating layer fc8_softmax
+I1008 12:23:35.691797 55935 net.cpp:100] Creating Layer fc8_softmax
+I1008 12:23:35.691800 55935 net.cpp:434] fc8_softmax <- fc8_fc8_new_0_split_1
+I1008 12:23:35.691805 55935 net.cpp:408] fc8_softmax -> fc8_softmax
+I1008 12:23:35.691851 55935 net.cpp:150] Setting up fc8_softmax
+I1008 12:23:35.691857 55935 net.cpp:157] Top shape: 128 31 (3968)
+I1008 12:23:35.691861 55935 net.cpp:165] Memory required for data: 963617796
+I1008 12:23:35.691864 55935 layer_factory.hpp:77] Creating layer slice_softmax
+I1008 12:23:35.691871 55935 net.cpp:100] Creating Layer slice_softmax
+I1008 12:23:35.691875 55935 net.cpp:434] slice_softmax <- fc8_softmax
+I1008 12:23:35.691880 55935 net.cpp:408] slice_softmax -> source_softmax
+I1008 12:23:35.691886 55935 net.cpp:408] slice_softmax -> target_softmax
+I1008 12:23:35.691911 55935 net.cpp:150] Setting up slice_softmax
+I1008 12:23:35.691917 55935 net.cpp:157] Top shape: 64 31 (1984)
+I1008 12:23:35.691921 55935 net.cpp:157] Top shape: 64 31 (1984)
+I1008 12:23:35.691925 55935 net.cpp:165] Memory required for data: 963633668
+I1008 12:23:35.691927 55935 layer_factory.hpp:77] Creating layer source_softmax_slice_softmax_0_split
+I1008 12:23:35.691932 55935 net.cpp:100] Creating Layer source_softmax_slice_softmax_0_split
+I1008 12:23:35.691936 55935 net.cpp:434] source_softmax_slice_softmax_0_split <- source_softmax
+I1008 12:23:35.691941 55935 net.cpp:408] source_softmax_slice_softmax_0_split -> source_softmax_slice_softmax_0_split_0
+I1008 12:23:35.691947 55935 net.cpp:408] source_softmax_slice_softmax_0_split -> source_softmax_slice_softmax_0_split_1
+I1008 12:23:35.691952 55935 net.cpp:408] source_softmax_slice_softmax_0_split -> source_softmax_slice_softmax_0_split_2
+I1008 12:23:35.691987 55935 net.cpp:150] Setting up source_softmax_slice_softmax_0_split
+I1008 12:23:35.691992 55935 net.cpp:157] Top shape: 64 31 (1984)
+I1008 12:23:35.691996 55935 net.cpp:157] Top shape: 64 31 (1984)
+I1008 12:23:35.692000 55935 net.cpp:157] Top shape: 64 31 (1984)
+I1008 12:23:35.692003 55935 net.cpp:165] Memory required for data: 963657476
+I1008 12:23:35.692006 55935 layer_factory.hpp:77] Creating layer target_softmax_slice_softmax_1_split
+I1008 12:23:35.692013 55935 net.cpp:100] Creating Layer target_softmax_slice_softmax_1_split
+I1008 12:23:35.692016 55935 net.cpp:434] target_softmax_slice_softmax_1_split <- target_softmax
+I1008 12:23:35.692023 55935 net.cpp:408] target_softmax_slice_softmax_1_split -> target_softmax_slice_softmax_1_split_0
+I1008 12:23:35.692028 55935 net.cpp:408] target_softmax_slice_softmax_1_split -> target_softmax_slice_softmax_1_split_1
+I1008 12:23:35.692032 55935 net.cpp:408] target_softmax_slice_softmax_1_split -> target_softmax_slice_softmax_1_split_2
+I1008 12:23:35.692065 55935 net.cpp:150] Setting up target_softmax_slice_softmax_1_split
+I1008 12:23:35.692070 55935 net.cpp:157] Top shape: 64 31 (1984)
+I1008 12:23:35.692075 55935 net.cpp:157] Top shape: 64 31 (1984)
+I1008 12:23:35.692077 55935 net.cpp:157] Top shape: 64 31 (1984)
+I1008 12:23:35.692080 55935 net.cpp:165] Memory required for data: 963681284
+I1008 12:23:35.692085 55935 layer_factory.hpp:77] Creating layer jmmd_loss_fc7
+I1008 12:23:35.692091 55935 net.cpp:100] Creating Layer jmmd_loss_fc7
+I1008 12:23:35.692095 55935 net.cpp:434] jmmd_loss_fc7 <- fc7_source
+I1008 12:23:35.692100 55935 net.cpp:434] jmmd_loss_fc7 <- fc7_target
+I1008 12:23:35.692103 55935 net.cpp:434] jmmd_loss_fc7 <- source_softmax_slice_softmax_0_split_0
+I1008 12:23:35.692107 55935 net.cpp:434] jmmd_loss_fc7 <- target_softmax_slice_softmax_1_split_0
+I1008 12:23:35.692112 55935 net.cpp:408] jmmd_loss_fc7 -> jmmd_loss_fc7
+I1008 12:23:35.692189 55935 net.cpp:150] Setting up jmmd_loss_fc7
+I1008 12:23:35.692198 55935 net.cpp:157] Top shape: (1)
+I1008 12:23:35.692200 55935 net.cpp:160]     with loss weight 1
+I1008 12:23:35.692210 55935 net.cpp:165] Memory required for data: 963681288
+I1008 12:23:35.692219 55935 layer_factory.hpp:77] Creating layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:23:35.692225 55935 net.cpp:100] Creating Layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:23:35.692229 55935 net.cpp:434] jmmd_loss_fc7_jmmd_loss_fc7_0_split <- jmmd_loss_fc7
+I1008 12:23:35.692234 55935 net.cpp:408] jmmd_loss_fc7_jmmd_loss_fc7_0_split -> jmmd_loss_fc7_jmmd_loss_fc7_0_split_0
+I1008 12:23:35.692240 55935 net.cpp:408] jmmd_loss_fc7_jmmd_loss_fc7_0_split -> jmmd_loss_fc7_jmmd_loss_fc7_0_split_1
+I1008 12:23:35.692260 55935 net.cpp:150] Setting up jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:23:35.692265 55935 net.cpp:157] Top shape: (1)
+I1008 12:23:35.692268 55935 net.cpp:160]     with loss weight 0.3
+I1008 12:23:35.692275 55935 net.cpp:157] Top shape: (1)
+I1008 12:23:35.692277 55935 net.cpp:165] Memory required for data: 963681296
+I1008 12:23:35.692281 55935 layer_factory.hpp:77] Creating layer jmmd_loss_softmax
+I1008 12:23:35.692287 55935 net.cpp:100] Creating Layer jmmd_loss_softmax
+I1008 12:23:35.692291 55935 net.cpp:434] jmmd_loss_softmax <- source_softmax_slice_softmax_0_split_1
+I1008 12:23:35.692296 55935 net.cpp:434] jmmd_loss_softmax <- target_softmax_slice_softmax_1_split_1
+I1008 12:23:35.692299 55935 net.cpp:434] jmmd_loss_softmax <- source_softmax_slice_softmax_0_split_2
+I1008 12:23:35.692302 55935 net.cpp:434] jmmd_loss_softmax <- target_softmax_slice_softmax_1_split_2
+I1008 12:23:35.692308 55935 net.cpp:408] jmmd_loss_softmax -> jmmd_loss_softmax
+I1008 12:23:35.692368 55935 net.cpp:150] Setting up jmmd_loss_softmax
+I1008 12:23:35.692374 55935 net.cpp:157] Top shape: (1)
+I1008 12:23:35.692378 55935 net.cpp:160]     with loss weight 1
+I1008 12:23:35.692381 55935 net.cpp:165] Memory required for data: 963681300
+I1008 12:23:35.692385 55935 layer_factory.hpp:77] Creating layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:23:35.692390 55935 net.cpp:100] Creating Layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:23:35.692394 55935 net.cpp:434] jmmd_loss_softmax_jmmd_loss_softmax_0_split <- jmmd_loss_softmax
+I1008 12:23:35.692399 55935 net.cpp:408] jmmd_loss_softmax_jmmd_loss_softmax_0_split -> jmmd_loss_softmax_jmmd_loss_softmax_0_split_0
+I1008 12:23:35.692405 55935 net.cpp:408] jmmd_loss_softmax_jmmd_loss_softmax_0_split -> jmmd_loss_softmax_jmmd_loss_softmax_0_split_1
+I1008 12:23:35.692422 55935 net.cpp:150] Setting up jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:23:35.692428 55935 net.cpp:157] Top shape: (1)
+I1008 12:23:35.692431 55935 net.cpp:160]     with loss weight 0.3
+I1008 12:23:35.692436 55935 net.cpp:157] Top shape: (1)
+I1008 12:23:35.692440 55935 net.cpp:165] Memory required for data: 963681308
+I1008 12:23:35.692442 55935 layer_factory.hpp:77] Creating layer silence_loss_value
+I1008 12:23:35.692448 55935 net.cpp:100] Creating Layer silence_loss_value
+I1008 12:23:35.692452 55935 net.cpp:434] silence_loss_value <- jmmd_loss_fc7_jmmd_loss_fc7_0_split_1
+I1008 12:23:35.692456 55935 net.cpp:434] silence_loss_value <- jmmd_loss_softmax_jmmd_loss_softmax_0_split_1
+I1008 12:23:35.692461 55935 net.cpp:150] Setting up silence_loss_value
+I1008 12:23:35.692463 55935 net.cpp:165] Memory required for data: 963681308
+I1008 12:23:35.692468 55935 net.cpp:228] silence_loss_value does not need backward computation.
+I1008 12:23:35.692472 55935 net.cpp:226] jmmd_loss_softmax_jmmd_loss_softmax_0_split needs backward computation.
+I1008 12:23:35.692476 55935 net.cpp:226] jmmd_loss_softmax needs backward computation.
+I1008 12:23:35.692479 55935 net.cpp:226] jmmd_loss_fc7_jmmd_loss_fc7_0_split needs backward computation.
+I1008 12:23:35.692483 55935 net.cpp:226] jmmd_loss_fc7 needs backward computation.
+I1008 12:23:35.692487 55935 net.cpp:226] target_softmax_slice_softmax_1_split needs backward computation.
+I1008 12:23:35.692490 55935 net.cpp:226] source_softmax_slice_softmax_0_split needs backward computation.
+I1008 12:23:35.692494 55935 net.cpp:226] slice_softmax needs backward computation.
+I1008 12:23:35.692498 55935 net.cpp:226] fc8_softmax needs backward computation.
+I1008 12:23:35.692507 55935 net.cpp:226] softmax_loss needs backward computation.
+I1008 12:23:35.692515 55935 net.cpp:228] silence does not need backward computation.
+I1008 12:23:35.692519 55935 net.cpp:226] slice_fc8 needs backward computation.
+I1008 12:23:35.692523 55935 net.cpp:226] slice_fc7 needs backward computation.
+I1008 12:23:35.692526 55935 net.cpp:226] fc8_fc8_new_0_split needs backward computation.
+I1008 12:23:35.692530 55935 net.cpp:226] fc8_new needs backward computation.
+I1008 12:23:35.692533 55935 net.cpp:226] fc7_drop7_0_split needs backward computation.
+I1008 12:23:35.692538 55935 net.cpp:226] drop7 needs backward computation.
+I1008 12:23:35.692540 55935 net.cpp:226] relu7 needs backward computation.
+I1008 12:23:35.692543 55935 net.cpp:226] fc7 needs backward computation.
+I1008 12:23:35.692546 55935 net.cpp:226] drop6 needs backward computation.
+I1008 12:23:35.692550 55935 net.cpp:226] relu6 needs backward computation.
+I1008 12:23:35.692553 55935 net.cpp:226] fc6 needs backward computation.
+I1008 12:23:35.692558 55935 net.cpp:226] pool5 needs backward computation.
+I1008 12:23:35.692560 55935 net.cpp:226] relu5 needs backward computation.
+I1008 12:23:35.692564 55935 net.cpp:226] conv5 needs backward computation.
+I1008 12:23:35.692567 55935 net.cpp:226] relu4 needs backward computation.
+I1008 12:23:35.692570 55935 net.cpp:226] conv4 needs backward computation.
+I1008 12:23:35.692574 55935 net.cpp:226] relu3 needs backward computation.
+I1008 12:23:35.692577 55935 net.cpp:226] conv3 needs backward computation.
+I1008 12:23:35.692581 55935 net.cpp:228] norm2 does not need backward computation.
+I1008 12:23:35.692585 55935 net.cpp:228] pool2 does not need backward computation.
+I1008 12:23:35.692589 55935 net.cpp:228] relu2 does not need backward computation.
+I1008 12:23:35.692592 55935 net.cpp:228] conv2 does not need backward computation.
+I1008 12:23:35.692596 55935 net.cpp:228] norm1 does not need backward computation.
+I1008 12:23:35.692600 55935 net.cpp:228] pool1 does not need backward computation.
+I1008 12:23:35.692602 55935 net.cpp:228] relu1 does not need backward computation.
+I1008 12:23:35.692606 55935 net.cpp:228] conv1 does not need backward computation.
+I1008 12:23:35.692610 55935 net.cpp:228] data does not need backward computation.
+I1008 12:23:35.692613 55935 net.cpp:228] target_label_silence does not need backward computation.
+I1008 12:23:35.692618 55935 net.cpp:228] target_data does not need backward computation.
+I1008 12:23:35.692622 55935 net.cpp:228] source_data does not need backward computation.
+I1008 12:23:35.692625 55935 net.cpp:270] This network produces output jmmd_loss_fc7_jmmd_loss_fc7_0_split_0
+I1008 12:23:35.692629 55935 net.cpp:270] This network produces output jmmd_loss_softmax_jmmd_loss_softmax_0_split_0
+I1008 12:23:35.692633 55935 net.cpp:270] This network produces output softmax_loss
+I1008 12:23:35.692659 55935 net.cpp:283] Network initialization done.
+I1008 12:23:35.693414 55935 solver.cpp:182] Creating test net (#0) specified by net file: models/JAN/alexnet/train_val.prototxt
+I1008 12:23:35.693464 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer source_data
+I1008 12:23:35.693469 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer target_data
+I1008 12:23:35.693472 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer target_label_silence
+I1008 12:23:35.693476 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer data
+I1008 12:23:35.693490 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer slice_fc7
+I1008 12:23:35.693493 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer slice_fc8
+I1008 12:23:35.693497 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer silence
+I1008 12:23:35.693500 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer softmax_loss
+I1008 12:23:35.693517 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer fc8_softmax
+I1008 12:23:35.693521 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer slice_softmax
+I1008 12:23:35.693524 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer jmmd_loss_fc7
+I1008 12:23:35.693527 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer jmmd_loss_softmax
+I1008 12:23:35.693531 55935 net.cpp:322] The NetState phase (1) differed from the phase (0) specified by a rule in layer silence_loss_value
+I1008 12:23:35.693722 55935 net.cpp:58] Initializing net from parameters: 
+name: "amazon_to_webcam"
+state {
+  phase: TEST
+}
+layer {
+  name: "test_data"
+  type: "ImageData"
+  top: "data"
+  top: "label"
+  include {
+    phase: TEST
+  }
+  transform_param {
+    mirror: false
+    crop_size: 227
+    mean_file: "./data/ilsvrc12/imagenet_mean.binaryproto"
+  }
+  image_data_param {
+    source: "./data/office/amazon_list.txt"
+    batch_size: 1
+    shuffle: false
+    new_height: 256
+    new_width: 256
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 96
+    kernel_size: 11
+    stride: 4
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "pool1"
+  type: "Pooling"
+  bottom: "conv1"
+  top: "pool1"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: "norm1"
+  type: "LRN"
+  bottom: "pool1"
+  top: "norm1"
+  lrn_param {
+    local_size: 5
+    alpha: 0.0001
+    beta: 0.75
+  }
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "norm1"
+  top: "conv2"
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 2
+    kernel_size: 5
+    group: 2
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+layer {
+  name: "relu2"
+  type: "ReLU"
+  bottom: "conv2"
+  top: "conv2"
+}
+layer {
+  name: "pool2"
+  type: "Pooling"
+  bottom: "conv2"
+  top: "pool2"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: "norm2"
+  type: "LRN"
+  bottom: "pool2"
+  top: "norm2"
+  lrn_param {
+    local_size: 5
+    alpha: 0.0001
+    beta: 0.75
+  }
+}
+layer {
+  name: "conv3"
+  type: "Convolution"
+  bottom: "norm2"
+  top: "conv3"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 384
+    pad: 1
+    kernel_size: 3
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu3"
+  type: "ReLU"
+  bottom: "conv3"
+  top: "conv3"
+}
+layer {
+  name: "conv4"
+  type: "Convolution"
+  bottom: "conv3"
+  top: "conv4"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 384
+    pad: 1
+    kernel_size: 3
+    group: 2
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+layer {
+  name: "relu4"
+  type: "ReLU"
+  bottom: "conv4"
+  top: "conv4"
+}
+layer {
+  name: "conv5"
+  type: "Convolution"
+  bottom: "conv4"
+  top: "conv5"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 256
+    pad: 1
+    kernel_size: 3
+    group: 2
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+layer {
+  name: "relu5"
+  type: "ReLU"
+  bottom: "conv5"
+  top: "conv5"
+}
+layer {
+  name: "pool5"
+  type: "Pooling"
+  bottom: "conv5"
+  top: "pool5"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: "fc6"
+  type: "InnerProduct"
+  bottom: "pool5"
+  top: "fc6"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 4096
+    weight_filler {
+      type: "gaussian"
+      std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+layer {
+  name: "relu6"
+  type: "ReLU"
+  bottom: "fc6"
+  top: "fc6"
+}
+layer {
+  name: "drop6"
+  type: "Dropout"
+  bottom: "fc6"
+  top: "fc6"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc7"
+  type: "InnerProduct"
+  bottom: "fc6"
+  top: "fc7"
+  param {
+    lr_mult: 0.1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 4096
+    weight_filler {
+      type: "gaussian"
+      std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      value: 1
+    }
+  }
+}
+layer {
+  name: "relu7"
+  type: "ReLU"
+  bottom: "fc7"
+  top: "fc7"
+}
+layer {
+  name: "drop7"
+  type: "Dropout"
+  bottom: "fc7"
+  top: "fc7"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc8_new"
+  type: "InnerProduct"
+  bottom: "fc7"
+  top: "fc8"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 31
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "accuracy"
+  type: "Accuracy"
+  bottom: "fc8"
+  bottom: "label"
+  top: "accuracy"
+  include {
+    phase: TEST
+  }
+}
+I1008 12:23:35.693805 55935 layer_factory.hpp:77] Creating layer test_data
+I1008 12:23:35.693819 55935 net.cpp:100] Creating Layer test_data
+I1008 12:23:35.693823 55935 net.cpp:408] test_data -> data
+I1008 12:23:35.693831 55935 net.cpp:408] test_data -> label
+I1008 12:23:35.693838 55935 data_transformer.cpp:25] Loading mean file from: ./data/ilsvrc12/imagenet_mean.binaryproto
+I1008 12:23:35.696633 55935 image_data_layer.cpp:38] Opening file ./data/office/amazon_list.txt
+I1008 12:23:35.697327 55935 image_data_layer.cpp:58] A total of 2817 images.
+I1008 12:23:35.698397 55935 image_data_layer.cpp:85] output data size: 1,3,227,227
+I1008 12:23:35.700819 55935 net.cpp:150] Setting up test_data
+I1008 12:23:35.700834 55935 net.cpp:157] Top shape: 1 3 227 227 (154587)
+I1008 12:23:35.700839 55935 net.cpp:157] Top shape: 1 (1)
+I1008 12:23:35.700842 55935 net.cpp:165] Memory required for data: 618352
+I1008 12:23:35.700847 55935 layer_factory.hpp:77] Creating layer conv1
+I1008 12:23:35.700860 55935 net.cpp:100] Creating Layer conv1
+I1008 12:23:35.700865 55935 net.cpp:434] conv1 <- data
+I1008 12:23:35.700870 55935 net.cpp:408] conv1 -> conv1
+I1008 12:23:35.701886 55935 net.cpp:150] Setting up conv1
+I1008 12:23:35.701896 55935 net.cpp:157] Top shape: 1 96 55 55 (290400)
+I1008 12:23:35.701900 55935 net.cpp:165] Memory required for data: 1779952
+I1008 12:23:35.701907 55935 layer_factory.hpp:77] Creating layer relu1
+I1008 12:23:35.701915 55935 net.cpp:100] Creating Layer relu1
+I1008 12:23:35.701918 55935 net.cpp:434] relu1 <- conv1
+I1008 12:23:35.701922 55935 net.cpp:395] relu1 -> conv1 (in-place)
+I1008 12:23:35.701928 55935 net.cpp:150] Setting up relu1
+I1008 12:23:35.701932 55935 net.cpp:157] Top shape: 1 96 55 55 (290400)
+I1008 12:23:35.701936 55935 net.cpp:165] Memory required for data: 2941552
+I1008 12:23:35.701938 55935 layer_factory.hpp:77] Creating layer pool1
+I1008 12:23:35.701943 55935 net.cpp:100] Creating Layer pool1
+I1008 12:23:35.701947 55935 net.cpp:434] pool1 <- conv1
+I1008 12:23:35.701951 55935 net.cpp:408] pool1 -> pool1
+I1008 12:23:35.701980 55935 net.cpp:150] Setting up pool1
+I1008 12:23:35.701985 55935 net.cpp:157] Top shape: 1 96 27 27 (69984)
+I1008 12:23:35.701989 55935 net.cpp:165] Memory required for data: 3221488
+I1008 12:23:35.701992 55935 layer_factory.hpp:77] Creating layer norm1
+I1008 12:23:35.702006 55935 net.cpp:100] Creating Layer norm1
+I1008 12:23:35.702018 55935 net.cpp:434] norm1 <- pool1
+I1008 12:23:35.702023 55935 net.cpp:408] norm1 -> norm1
+I1008 12:23:35.702049 55935 net.cpp:150] Setting up norm1
+I1008 12:23:35.702055 55935 net.cpp:157] Top shape: 1 96 27 27 (69984)
+I1008 12:23:35.702059 55935 net.cpp:165] Memory required for data: 3501424
+I1008 12:23:35.702062 55935 layer_factory.hpp:77] Creating layer conv2
+I1008 12:23:35.702069 55935 net.cpp:100] Creating Layer conv2
+I1008 12:23:35.702074 55935 net.cpp:434] conv2 <- norm1
+I1008 12:23:35.702077 55935 net.cpp:408] conv2 -> conv2
+I1008 12:23:35.708487 55935 net.cpp:150] Setting up conv2
+I1008 12:23:35.708495 55935 net.cpp:157] Top shape: 1 256 27 27 (186624)
+I1008 12:23:35.708498 55935 net.cpp:165] Memory required for data: 4247920
+I1008 12:23:35.708505 55935 layer_factory.hpp:77] Creating layer relu2
+I1008 12:23:35.708511 55935 net.cpp:100] Creating Layer relu2
+I1008 12:23:35.708514 55935 net.cpp:434] relu2 <- conv2
+I1008 12:23:35.708518 55935 net.cpp:395] relu2 -> conv2 (in-place)
+I1008 12:23:35.708524 55935 net.cpp:150] Setting up relu2
+I1008 12:23:35.708528 55935 net.cpp:157] Top shape: 1 256 27 27 (186624)
+I1008 12:23:35.708531 55935 net.cpp:165] Memory required for data: 4994416
+I1008 12:23:35.708534 55935 layer_factory.hpp:77] Creating layer pool2
+I1008 12:23:35.708539 55935 net.cpp:100] Creating Layer pool2
+I1008 12:23:35.708542 55935 net.cpp:434] pool2 <- conv2
+I1008 12:23:35.708562 55935 net.cpp:408] pool2 -> pool2
+I1008 12:23:35.708595 55935 net.cpp:150] Setting up pool2
+I1008 12:23:35.708600 55935 net.cpp:157] Top shape: 1 256 13 13 (43264)
+I1008 12:23:35.708603 55935 net.cpp:165] Memory required for data: 5167472
+I1008 12:23:35.708607 55935 layer_factory.hpp:77] Creating layer norm2
+I1008 12:23:35.708613 55935 net.cpp:100] Creating Layer norm2
+I1008 12:23:35.708616 55935 net.cpp:434] norm2 <- pool2
+I1008 12:23:35.708621 55935 net.cpp:408] norm2 -> norm2
+I1008 12:23:35.708653 55935 net.cpp:150] Setting up norm2
+I1008 12:23:35.708659 55935 net.cpp:157] Top shape: 1 256 13 13 (43264)
+I1008 12:23:35.708662 55935 net.cpp:165] Memory required for data: 5340528
+I1008 12:23:35.708665 55935 layer_factory.hpp:77] Creating layer conv3
+I1008 12:23:35.708673 55935 net.cpp:100] Creating Layer conv3
+I1008 12:23:35.708675 55935 net.cpp:434] conv3 <- norm2
+I1008 12:23:35.708679 55935 net.cpp:408] conv3 -> conv3
+I1008 12:23:35.728458 55935 net.cpp:150] Setting up conv3
+I1008 12:23:35.728473 55935 net.cpp:157] Top shape: 1 384 13 13 (64896)
+I1008 12:23:35.728477 55935 net.cpp:165] Memory required for data: 5600112
+I1008 12:23:35.728484 55935 layer_factory.hpp:77] Creating layer relu3
+I1008 12:23:35.728490 55935 net.cpp:100] Creating Layer relu3
+I1008 12:23:35.728493 55935 net.cpp:434] relu3 <- conv3
+I1008 12:23:35.728498 55935 net.cpp:395] relu3 -> conv3 (in-place)
+I1008 12:23:35.728503 55935 net.cpp:150] Setting up relu3
+I1008 12:23:35.728508 55935 net.cpp:157] Top shape: 1 384 13 13 (64896)
+I1008 12:23:35.728510 55935 net.cpp:165] Memory required for data: 5859696
+I1008 12:23:35.728513 55935 layer_factory.hpp:77] Creating layer conv4
+I1008 12:23:35.728520 55935 net.cpp:100] Creating Layer conv4
+I1008 12:23:35.728523 55935 net.cpp:434] conv4 <- conv3
+I1008 12:23:35.728528 55935 net.cpp:408] conv4 -> conv4
+I1008 12:23:35.742702 55935 net.cpp:150] Setting up conv4
+I1008 12:23:35.742717 55935 net.cpp:157] Top shape: 1 384 13 13 (64896)
+I1008 12:23:35.742720 55935 net.cpp:165] Memory required for data: 6119280
+I1008 12:23:35.742727 55935 layer_factory.hpp:77] Creating layer relu4
+I1008 12:23:35.742732 55935 net.cpp:100] Creating Layer relu4
+I1008 12:23:35.742735 55935 net.cpp:434] relu4 <- conv4
+I1008 12:23:35.742740 55935 net.cpp:395] relu4 -> conv4 (in-place)
+I1008 12:23:35.742745 55935 net.cpp:150] Setting up relu4
+I1008 12:23:35.742749 55935 net.cpp:157] Top shape: 1 384 13 13 (64896)
+I1008 12:23:35.742753 55935 net.cpp:165] Memory required for data: 6378864
+I1008 12:23:35.742755 55935 layer_factory.hpp:77] Creating layer conv5
+I1008 12:23:35.742780 55935 net.cpp:100] Creating Layer conv5
+I1008 12:23:35.742792 55935 net.cpp:434] conv5 <- conv4
+I1008 12:23:35.742799 55935 net.cpp:408] conv5 -> conv5
+I1008 12:23:35.752755 55935 net.cpp:150] Setting up conv5
+I1008 12:23:35.752768 55935 net.cpp:157] Top shape: 1 256 13 13 (43264)
+I1008 12:23:35.752773 55935 net.cpp:165] Memory required for data: 6551920
+I1008 12:23:35.752780 55935 layer_factory.hpp:77] Creating layer relu5
+I1008 12:23:35.752786 55935 net.cpp:100] Creating Layer relu5
+I1008 12:23:35.752789 55935 net.cpp:434] relu5 <- conv5
+I1008 12:23:35.752794 55935 net.cpp:395] relu5 -> conv5 (in-place)
+I1008 12:23:35.752800 55935 net.cpp:150] Setting up relu5
+I1008 12:23:35.752804 55935 net.cpp:157] Top shape: 1 256 13 13 (43264)
+I1008 12:23:35.752807 55935 net.cpp:165] Memory required for data: 6724976
+I1008 12:23:35.752810 55935 layer_factory.hpp:77] Creating layer pool5
+I1008 12:23:35.752815 55935 net.cpp:100] Creating Layer pool5
+I1008 12:23:35.752818 55935 net.cpp:434] pool5 <- conv5
+I1008 12:23:35.752822 55935 net.cpp:408] pool5 -> pool5
+I1008 12:23:35.752851 55935 net.cpp:150] Setting up pool5
+I1008 12:23:35.752856 55935 net.cpp:157] Top shape: 1 256 6 6 (9216)
+I1008 12:23:35.752858 55935 net.cpp:165] Memory required for data: 6761840
+I1008 12:23:35.752861 55935 layer_factory.hpp:77] Creating layer fc6
+I1008 12:23:35.752868 55935 net.cpp:100] Creating Layer fc6
+I1008 12:23:35.752871 55935 net.cpp:434] fc6 <- pool5
+I1008 12:23:35.752877 55935 net.cpp:408] fc6 -> fc6
+I1008 12:23:36.562317 55935 net.cpp:150] Setting up fc6
+I1008 12:23:36.562356 55935 net.cpp:157] Top shape: 1 4096 (4096)
+I1008 12:23:36.562361 55935 net.cpp:165] Memory required for data: 6778224
+I1008 12:23:36.562371 55935 layer_factory.hpp:77] Creating layer relu6
+I1008 12:23:36.562381 55935 net.cpp:100] Creating Layer relu6
+I1008 12:23:36.562386 55935 net.cpp:434] relu6 <- fc6
+I1008 12:23:36.562394 55935 net.cpp:395] relu6 -> fc6 (in-place)
+I1008 12:23:36.562404 55935 net.cpp:150] Setting up relu6
+I1008 12:23:36.562408 55935 net.cpp:157] Top shape: 1 4096 (4096)
+I1008 12:23:36.562412 55935 net.cpp:165] Memory required for data: 6794608
+I1008 12:23:36.562415 55935 layer_factory.hpp:77] Creating layer drop6
+I1008 12:23:36.562422 55935 net.cpp:100] Creating Layer drop6
+I1008 12:23:36.562425 55935 net.cpp:434] drop6 <- fc6
+I1008 12:23:36.562430 55935 net.cpp:395] drop6 -> fc6 (in-place)
+I1008 12:23:36.562450 55935 net.cpp:150] Setting up drop6
+I1008 12:23:36.562458 55935 net.cpp:157] Top shape: 1 4096 (4096)
+I1008 12:23:36.562460 55935 net.cpp:165] Memory required for data: 6810992
+I1008 12:23:36.562463 55935 layer_factory.hpp:77] Creating layer fc7
+I1008 12:23:36.562472 55935 net.cpp:100] Creating Layer fc7
+I1008 12:23:36.562476 55935 net.cpp:434] fc7 <- fc6
+I1008 12:23:36.562482 55935 net.cpp:408] fc7 -> fc7
+I1008 12:23:36.934808 55935 net.cpp:150] Setting up fc7
+I1008 12:23:36.934854 55935 net.cpp:157] Top shape: 1 4096 (4096)
+I1008 12:23:36.934859 55935 net.cpp:165] Memory required for data: 6827376
+I1008 12:23:36.934869 55935 layer_factory.hpp:77] Creating layer relu7
+I1008 12:23:36.934880 55935 net.cpp:100] Creating Layer relu7
+I1008 12:23:36.934885 55935 net.cpp:434] relu7 <- fc7
+I1008 12:23:36.934893 55935 net.cpp:395] relu7 -> fc7 (in-place)
+I1008 12:23:36.934903 55935 net.cpp:150] Setting up relu7
+I1008 12:23:36.934907 55935 net.cpp:157] Top shape: 1 4096 (4096)
+I1008 12:23:36.934911 55935 net.cpp:165] Memory required for data: 6843760
+I1008 12:23:36.934914 55935 layer_factory.hpp:77] Creating layer drop7
+I1008 12:23:36.934921 55935 net.cpp:100] Creating Layer drop7
+I1008 12:23:36.934924 55935 net.cpp:434] drop7 <- fc7
+I1008 12:23:36.934929 55935 net.cpp:395] drop7 -> fc7 (in-place)
+I1008 12:23:36.934948 55935 net.cpp:150] Setting up drop7
+I1008 12:23:36.934954 55935 net.cpp:157] Top shape: 1 4096 (4096)
+I1008 12:23:36.934957 55935 net.cpp:165] Memory required for data: 6860144
+I1008 12:23:36.934960 55935 layer_factory.hpp:77] Creating layer fc8_new
+I1008 12:23:36.934970 55935 net.cpp:100] Creating Layer fc8_new
+I1008 12:23:36.934991 55935 net.cpp:434] fc8_new <- fc7
+I1008 12:23:36.934999 55935 net.cpp:408] fc8_new -> fc8
+I1008 12:23:36.937741 55935 net.cpp:150] Setting up fc8_new
+I1008 12:23:36.937750 55935 net.cpp:157] Top shape: 1 31 (31)
+I1008 12:23:36.937753 55935 net.cpp:165] Memory required for data: 6860268
+I1008 12:23:36.937759 55935 layer_factory.hpp:77] Creating layer accuracy
+I1008 12:23:36.937767 55935 net.cpp:100] Creating Layer accuracy
+I1008 12:23:36.937772 55935 net.cpp:434] accuracy <- fc8
+I1008 12:23:36.937775 55935 net.cpp:434] accuracy <- label
+I1008 12:23:36.937780 55935 net.cpp:408] accuracy -> accuracy
+I1008 12:23:36.937788 55935 net.cpp:150] Setting up accuracy
+I1008 12:23:36.937793 55935 net.cpp:157] Top shape: (1)
+I1008 12:23:36.937796 55935 net.cpp:165] Memory required for data: 6860272
+I1008 12:23:36.937800 55935 net.cpp:228] accuracy does not need backward computation.
+I1008 12:23:36.937803 55935 net.cpp:228] fc8_new does not need backward computation.
+I1008 12:23:36.937808 55935 net.cpp:228] drop7 does not need backward computation.
+I1008 12:23:36.937810 55935 net.cpp:228] relu7 does not need backward computation.
+I1008 12:23:36.937813 55935 net.cpp:228] fc7 does not need backward computation.
+I1008 12:23:36.937816 55935 net.cpp:228] drop6 does not need backward computation.
+I1008 12:23:36.937820 55935 net.cpp:228] relu6 does not need backward computation.
+I1008 12:23:36.937824 55935 net.cpp:228] fc6 does not need backward computation.
+I1008 12:23:36.937826 55935 net.cpp:228] pool5 does not need backward computation.
+I1008 12:23:36.937830 55935 net.cpp:228] relu5 does not need backward computation.
+I1008 12:23:36.937834 55935 net.cpp:228] conv5 does not need backward computation.
+I1008 12:23:36.937837 55935 net.cpp:228] relu4 does not need backward computation.
+I1008 12:23:36.937840 55935 net.cpp:228] conv4 does not need backward computation.
+I1008 12:23:36.937844 55935 net.cpp:228] relu3 does not need backward computation.
+I1008 12:23:36.937849 55935 net.cpp:228] conv3 does not need backward computation.
+I1008 12:23:36.937851 55935 net.cpp:228] norm2 does not need backward computation.
+I1008 12:23:36.937855 55935 net.cpp:228] pool2 does not need backward computation.
+I1008 12:23:36.937858 55935 net.cpp:228] relu2 does not need backward computation.
+I1008 12:23:36.937862 55935 net.cpp:228] conv2 does not need backward computation.
+I1008 12:23:36.937865 55935 net.cpp:228] norm1 does not need backward computation.
+I1008 12:23:36.937868 55935 net.cpp:228] pool1 does not need backward computation.
+I1008 12:23:36.937872 55935 net.cpp:228] relu1 does not need backward computation.
+I1008 12:23:36.937875 55935 net.cpp:228] conv1 does not need backward computation.
+I1008 12:23:36.937880 55935 net.cpp:228] test_data does not need backward computation.
+I1008 12:23:36.937882 55935 net.cpp:270] This network produces output accuracy
+I1008 12:23:36.937894 55935 net.cpp:283] Network initialization done.
+I1008 12:23:36.938000 55935 solver.cpp:61] Solver scaffolding done.
+I1008 12:23:36.938416 55935 caffe.cpp:155] Finetuning from models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel
+I1008 12:23:37.150532 55935 upgrade_proto.cpp:44] Attempting to upgrade input file specified using deprecated transformation parameters: models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel
+I1008 12:23:37.150568 55935 upgrade_proto.cpp:47] Successfully upgraded file specified using deprecated data transformation parameters.
+W1008 12:23:37.150574 55935 upgrade_proto.cpp:49] Note that future Caffe releases will only support transform_param messages for transformation fields.
+I1008 12:23:37.150714 55935 upgrade_proto.cpp:53] Attempting to upgrade input file specified using deprecated V1LayerParameter: models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel
+I1008 12:23:37.432085 55935 upgrade_proto.cpp:61] Successfully upgraded file specified using deprecated V1LayerParameter
+I1008 12:23:37.482244 55935 net.cpp:761] Ignoring source layer fc8
+I1008 12:23:37.482283 55935 net.cpp:761] Ignoring source layer loss
+I1008 12:23:37.695451 55935 upgrade_proto.cpp:44] Attempting to upgrade input file specified using deprecated transformation parameters: models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel
+I1008 12:23:37.695509 55935 upgrade_proto.cpp:47] Successfully upgraded file specified using deprecated data transformation parameters.
+W1008 12:23:37.695513 55935 upgrade_proto.cpp:49] Note that future Caffe releases will only support transform_param messages for transformation fields.
+I1008 12:23:37.695523 55935 upgrade_proto.cpp:53] Attempting to upgrade input file specified using deprecated V1LayerParameter: models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel
+I1008 12:23:37.964612 55935 upgrade_proto.cpp:61] Successfully upgraded file specified using deprecated V1LayerParameter
+I1008 12:23:37.965546 55935 net.cpp:761] Ignoring source layer data
+I1008 12:23:38.045168 55935 net.cpp:761] Ignoring source layer fc8
+I1008 12:23:38.045219 55935 net.cpp:761] Ignoring source layer loss
+I1008 12:23:38.050273 55935 caffe.cpp:251] Starting Optimization
+I1008 12:23:38.050294 55935 solver.cpp:282] Solving amazon_to_webcam
+I1008 12:23:38.050300 55935 solver.cpp:283] Learning Rate Policy: inv
+I1008 12:23:38.061584 55935 solver.cpp:340] Iteration 0, Testing net (#0)
+I1008 12:23:38.061605 55935 net.cpp:693] Ignoring source layer source_data
+I1008 12:23:38.061611 55935 net.cpp:693] Ignoring source layer target_data
+I1008 12:23:38.061616 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 12:23:38.061622 55935 net.cpp:693] Ignoring source layer data
+I1008 12:23:38.108774 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 12:23:38.108827 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 12:23:38.108834 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 12:23:38.108839 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 12:23:38.108842 55935 net.cpp:693] Ignoring source layer silence
+I1008 12:23:38.108846 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 12:23:38.108850 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 12:23:38.108855 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 12:23:38.108860 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 12:23:38.108863 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 12:23:38.108867 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 12:23:38.108871 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:23:38.108875 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 12:23:38.108880 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:23:38.108883 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 12:23:38.149317 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:23:40.816563 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:23:43.226505 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:23:45.162428 55935 solver.cpp:407]     Test net output #0: accuracy = 0.029464
+I1008 12:23:45.360093 55935 solver.cpp:231] Iteration 0, loss = 4.26616
+I1008 12:23:45.360177 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:23:45.360184 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:23:45.360190 55935 solver.cpp:247]     Train net output #2: softmax_loss = 4.26616 (* 1 = 4.26616 loss)
+I1008 12:23:45.360214 55935 sgd_solver.cpp:106] Iteration 0, lr = 0.001
+I1008 12:25:05.743293 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:27:20.495205 55935 solver.cpp:340] Iteration 500, Testing net (#0)
+I1008 12:27:20.495455 55935 net.cpp:693] Ignoring source layer source_data
+I1008 12:27:20.495487 55935 net.cpp:693] Ignoring source layer target_data
+I1008 12:27:20.495496 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 12:27:20.495537 55935 net.cpp:693] Ignoring source layer data
+I1008 12:27:20.495597 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 12:27:20.495612 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 12:27:20.495625 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 12:27:20.495632 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 12:27:20.495640 55935 net.cpp:693] Ignoring source layer silence
+I1008 12:27:20.495648 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 12:27:20.495656 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 12:27:20.495663 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 12:27:20.495671 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 12:27:20.495679 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 12:27:20.495694 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 12:27:20.495702 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:27:20.495708 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 12:27:20.495718 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:27:20.495725 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 12:27:22.540134 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:27:25.097540 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:27:27.603013 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:27:27.908555 55935 solver.cpp:407]     Test net output #0: accuracy = 0.505857
+I1008 12:27:28.071523 55935 solver.cpp:231] Iteration 500, loss = 0.0156812
+I1008 12:27:28.071576 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:27:28.071588 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:27:28.071593 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.0156812 (* 1 = 0.0156812 loss)
+I1008 12:27:28.071604 55935 sgd_solver.cpp:106] Iteration 500, lr = 0.000737788
+I1008 12:31:02.366122 55935 solver.cpp:340] Iteration 1000, Testing net (#0)
+I1008 12:31:02.366444 55935 net.cpp:693] Ignoring source layer source_data
+I1008 12:31:02.366477 55935 net.cpp:693] Ignoring source layer target_data
+I1008 12:31:02.366487 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 12:31:02.366495 55935 net.cpp:693] Ignoring source layer data
+I1008 12:31:02.366572 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 12:31:02.366587 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 12:31:02.366596 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 12:31:02.366610 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 12:31:02.366621 55935 net.cpp:693] Ignoring source layer silence
+I1008 12:31:02.366628 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 12:31:02.366637 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 12:31:02.366645 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 12:31:02.366657 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 12:31:02.366667 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 12:31:02.366677 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 12:31:02.366686 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:31:02.366696 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 12:31:02.366708 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:31:02.366716 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 12:31:03.590381 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:31:06.134969 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:31:08.533561 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:31:09.571889 55935 solver.cpp:407]     Test net output #0: accuracy = 0.533546
+I1008 12:31:09.734661 55935 solver.cpp:231] Iteration 1000, loss = 0.00324939
+I1008 12:31:09.734710 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:31:09.734719 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:31:09.734726 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.0032494 (* 1 = 0.0032494 loss)
+I1008 12:31:09.734735 55935 sgd_solver.cpp:106] Iteration 1000, lr = 0.000594604
+I1008 12:34:44.118899 55935 solver.cpp:340] Iteration 1500, Testing net (#0)
+I1008 12:34:44.119060 55935 net.cpp:693] Ignoring source layer source_data
+I1008 12:34:44.119067 55935 net.cpp:693] Ignoring source layer target_data
+I1008 12:34:44.119072 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 12:34:44.119076 55935 net.cpp:693] Ignoring source layer data
+I1008 12:34:44.119107 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 12:34:44.119114 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 12:34:44.119118 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 12:34:44.119125 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 12:34:44.119129 55935 net.cpp:693] Ignoring source layer silence
+I1008 12:34:44.119133 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 12:34:44.119137 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 12:34:44.119141 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 12:34:44.119144 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 12:34:44.119154 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 12:34:44.119158 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 12:34:44.119163 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:34:44.119168 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 12:34:44.119171 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:34:44.119176 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 12:34:44.458125 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:34:47.024263 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:34:49.430778 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:34:51.200815 55935 solver.cpp:407]     Test net output #0: accuracy = 0.537096
+I1008 12:34:51.363440 55935 solver.cpp:231] Iteration 1500, loss = 0.004861
+I1008 12:34:51.363490 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:34:51.363498 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:34:51.363504 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.00486101 (* 1 = 0.00486101 loss)
+I1008 12:34:51.363513 55935 sgd_solver.cpp:106] Iteration 1500, lr = 0.000502973
+I1008 12:36:43.342779 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:38:26.036464 55935 solver.cpp:340] Iteration 2000, Testing net (#0)
+I1008 12:38:26.036638 55935 net.cpp:693] Ignoring source layer source_data
+I1008 12:38:26.036645 55935 net.cpp:693] Ignoring source layer target_data
+I1008 12:38:26.036649 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 12:38:26.036653 55935 net.cpp:693] Ignoring source layer data
+I1008 12:38:26.036684 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 12:38:26.036690 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 12:38:26.036694 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 12:38:26.036696 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 12:38:26.036700 55935 net.cpp:693] Ignoring source layer silence
+I1008 12:38:26.036703 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 12:38:26.036706 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 12:38:26.036727 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 12:38:26.036731 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 12:38:26.036736 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 12:38:26.036738 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 12:38:26.036741 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:38:26.036744 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 12:38:26.036747 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:38:26.036751 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 12:38:28.198599 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:38:30.610404 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:38:33.006165 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:38:33.126924 55935 solver.cpp:407]     Test net output #0: accuracy = 0.538161
+I1008 12:38:33.289961 55935 solver.cpp:231] Iteration 2000, loss = 0.0063526
+I1008 12:38:33.290014 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:38:33.290024 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:38:33.290030 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.00635259 (* 1 = 0.00635259 loss)
+I1008 12:38:33.290037 55935 sgd_solver.cpp:106] Iteration 2000, lr = 0.000438691
+I1008 12:42:06.070343 55935 solver.cpp:340] Iteration 2500, Testing net (#0)
+I1008 12:42:06.070612 55935 net.cpp:693] Ignoring source layer source_data
+I1008 12:42:06.070655 55935 net.cpp:693] Ignoring source layer target_data
+I1008 12:42:06.070665 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 12:42:06.070673 55935 net.cpp:693] Ignoring source layer data
+I1008 12:42:06.070734 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 12:42:06.070749 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 12:42:06.070758 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 12:42:06.070766 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 12:42:06.070776 55935 net.cpp:693] Ignoring source layer silence
+I1008 12:42:06.070785 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 12:42:06.070792 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 12:42:06.070799 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 12:42:06.070809 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 12:42:06.070817 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 12:42:06.070825 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 12:42:06.070833 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:42:06.070842 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 12:42:06.070850 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:42:06.070858 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 12:42:07.480305 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:42:09.974113 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:42:12.368110 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:42:13.235741 55935 solver.cpp:407]     Test net output #0: accuracy = 0.544196
+I1008 12:42:13.399873 55935 solver.cpp:231] Iteration 2500, loss = 0.0633485
+I1008 12:42:13.399924 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:42:13.399932 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:42:13.399937 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.0633485 (* 1 = 0.0633485 loss)
+I1008 12:42:13.399948 55935 sgd_solver.cpp:106] Iteration 2500, lr = 0.000390795
+I1008 12:45:46.627630 55935 solver.cpp:340] Iteration 3000, Testing net (#0)
+I1008 12:45:46.627954 55935 net.cpp:693] Ignoring source layer source_data
+I1008 12:45:46.627985 55935 net.cpp:693] Ignoring source layer target_data
+I1008 12:45:46.627993 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 12:45:46.628005 55935 net.cpp:693] Ignoring source layer data
+I1008 12:45:46.628312 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 12:45:46.628338 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 12:45:46.628348 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 12:45:46.628358 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 12:45:46.628366 55935 net.cpp:693] Ignoring source layer silence
+I1008 12:45:46.628374 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 12:45:46.628382 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 12:45:46.628391 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 12:45:46.628399 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 12:45:46.628407 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 12:45:46.628415 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 12:45:46.628425 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:45:46.628432 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 12:45:46.628440 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:45:46.628448 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 12:45:47.182082 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:45:49.719944 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:45:52.123983 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:45:53.719197 55935 solver.cpp:407]     Test net output #0: accuracy = 0.552716
+I1008 12:45:53.882256 55935 solver.cpp:231] Iteration 3000, loss = 0.0212056
+I1008 12:45:53.882311 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:45:53.882320 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:45:53.882326 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.0212056 (* 1 = 0.0212056 loss)
+I1008 12:45:53.882336 55935 sgd_solver.cpp:106] Iteration 3000, lr = 0.000353553
+I1008 12:48:16.589735 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:49:28.324302 55935 solver.cpp:340] Iteration 3500, Testing net (#0)
+I1008 12:49:28.324460 55935 net.cpp:693] Ignoring source layer source_data
+I1008 12:49:28.324468 55935 net.cpp:693] Ignoring source layer target_data
+I1008 12:49:28.324472 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 12:49:28.324476 55935 net.cpp:693] Ignoring source layer data
+I1008 12:49:28.324517 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 12:49:28.324529 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 12:49:28.324534 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 12:49:28.324537 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 12:49:28.324542 55935 net.cpp:693] Ignoring source layer silence
+I1008 12:49:28.324545 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 12:49:28.324549 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 12:49:28.324553 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 12:49:28.324556 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 12:49:28.324561 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 12:49:28.324564 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 12:49:28.324568 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:49:28.324573 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 12:49:28.324576 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:49:28.324616 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 12:49:30.690587 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:49:33.095994 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:49:35.442829 55935 solver.cpp:407]     Test net output #0: accuracy = 0.549876
+I1008 12:49:35.606017 55935 solver.cpp:231] Iteration 3500, loss = 0.00050348
+I1008 12:49:35.606077 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:49:35.606086 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:49:35.606093 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000503468 (* 1 = 0.000503468 loss)
+I1008 12:49:35.606101 55935 sgd_solver.cpp:106] Iteration 3500, lr = 0.000323661
+I1008 12:49:44.487478 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:53:09.318619 55935 solver.cpp:340] Iteration 4000, Testing net (#0)
+I1008 12:53:09.318905 55935 net.cpp:693] Ignoring source layer source_data
+I1008 12:53:09.318935 55935 net.cpp:693] Ignoring source layer target_data
+I1008 12:53:09.318944 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 12:53:09.318953 55935 net.cpp:693] Ignoring source layer data
+I1008 12:53:09.319016 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 12:53:09.319027 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 12:53:09.319036 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 12:53:09.319044 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 12:53:09.319054 55935 net.cpp:693] Ignoring source layer silence
+I1008 12:53:09.319062 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 12:53:09.319069 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 12:53:09.319083 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 12:53:09.319097 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 12:53:09.319106 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 12:53:09.319114 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 12:53:09.319123 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:53:09.319131 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 12:53:09.319139 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:53:09.319190 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 12:53:10.871376 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:53:13.276788 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:53:15.678238 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:53:16.367111 55935 solver.cpp:407]     Test net output #0: accuracy = 0.546326
+I1008 12:53:16.529904 55935 solver.cpp:231] Iteration 4000, loss = 0.000727025
+I1008 12:53:16.529964 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:53:16.529973 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:53:16.529978 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000727019 (* 1 = 0.000727019 loss)
+I1008 12:53:16.529985 55935 sgd_solver.cpp:106] Iteration 4000, lr = 0.00029907
+I1008 12:56:49.961729 55935 solver.cpp:340] Iteration 4500, Testing net (#0)
+I1008 12:56:49.961966 55935 net.cpp:693] Ignoring source layer source_data
+I1008 12:56:49.961997 55935 net.cpp:693] Ignoring source layer target_data
+I1008 12:56:49.962005 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 12:56:49.962015 55935 net.cpp:693] Ignoring source layer data
+I1008 12:56:49.962072 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 12:56:49.962087 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 12:56:49.962132 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 12:56:49.962143 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 12:56:49.962152 55935 net.cpp:693] Ignoring source layer silence
+I1008 12:56:49.962159 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 12:56:49.962167 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 12:56:49.962177 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 12:56:49.962185 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 12:56:49.962193 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 12:56:49.962200 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 12:56:49.962210 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 12:56:49.962218 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 12:56:49.962226 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 12:56:49.962234 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 12:56:50.746150 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:56:53.228579 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:56:55.595883 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 12:56:57.006342 55935 solver.cpp:407]     Test net output #0: accuracy = 0.544196
+I1008 12:56:57.179316 55935 solver.cpp:231] Iteration 4500, loss = 0.000422759
+I1008 12:56:57.179378 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:56:57.179388 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 12:56:57.179395 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000422754 (* 1 = 0.000422754 loss)
+I1008 12:56:57.179405 55935 sgd_solver.cpp:106] Iteration 4500, lr = 0.000278438
+I1008 12:59:49.664768 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:00:31.397215 55935 solver.cpp:340] Iteration 5000, Testing net (#0)
+I1008 13:00:31.397368 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:00:31.397377 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:00:31.397379 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:00:31.397383 55935 net.cpp:693] Ignoring source layer data
+I1008 13:00:31.397418 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:00:31.397433 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:00:31.397438 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:00:31.397441 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:00:31.397445 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:00:31.397449 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:00:31.397454 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:00:31.397457 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:00:31.397460 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:00:31.397465 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:00:31.397469 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:00:31.397474 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:00:31.397477 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:00:31.397481 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:00:31.397485 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:00:33.910441 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:00:36.320024 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:00:38.493307 55935 solver.cpp:407]     Test net output #0: accuracy = 0.551296
+I1008 13:00:38.656397 55935 solver.cpp:231] Iteration 5000, loss = 0.000515727
+I1008 13:00:38.656450 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:00:38.656476 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:00:38.656486 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000515732 (* 1 = 0.000515732 loss)
+I1008 13:00:38.656494 55935 sgd_solver.cpp:106] Iteration 5000, lr = 0.000260847
+I1008 13:01:18.809623 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:04:16.183406 55935 solver.cpp:340] Iteration 5500, Testing net (#0)
+I1008 13:04:16.183548 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:04:16.183558 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:04:16.183562 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:04:16.183565 55935 net.cpp:693] Ignoring source layer data
+I1008 13:04:16.183709 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:04:16.183724 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:04:16.183729 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:04:16.183734 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:04:16.183739 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:04:16.183744 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:04:16.183755 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:04:16.183759 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:04:16.183764 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:04:16.183768 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:04:16.183771 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:04:16.183775 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:04:16.183780 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:04:16.183785 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:04:16.183789 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:04:17.925078 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:04:20.326105 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:04:22.719391 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:04:23.239508 55935 solver.cpp:407]     Test net output #0: accuracy = 0.552716
+I1008 13:04:23.402422 55935 solver.cpp:231] Iteration 5500, loss = 0.000919687
+I1008 13:04:23.402482 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:04:23.402490 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:04:23.402496 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000919687 (* 1 = 0.000919687 loss)
+I1008 13:04:23.402504 55935 sgd_solver.cpp:106] Iteration 5500, lr = 0.000245649
+I1008 13:07:58.898901 55935 solver.cpp:340] Iteration 6000, Testing net (#0)
+I1008 13:07:58.899201 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:07:58.899238 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:07:58.899248 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:07:58.899258 55935 net.cpp:693] Ignoring source layer data
+I1008 13:07:58.899320 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:07:58.899335 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:07:58.899344 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:07:58.899358 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:07:58.899366 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:07:58.899374 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:07:58.899382 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:07:58.899391 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:07:58.899400 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:07:58.899446 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:07:58.899456 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:07:58.899466 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:07:58.899472 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:07:58.899480 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:07:58.899488 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:07:59.868391 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:08:02.341936 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:08:04.733484 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:08:05.991624 55935 solver.cpp:407]     Test net output #0: accuracy = 0.552006
+I1008 13:08:06.154546 55935 solver.cpp:231] Iteration 6000, loss = 0.00023551
+I1008 13:08:06.154610 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:08:06.154619 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:08:06.154625 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.00023551 (* 1 = 0.00023551 loss)
+I1008 13:08:06.154635 55935 sgd_solver.cpp:106] Iteration 6000, lr = 0.000232368
+I1008 13:11:29.011186 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:11:40.902961 55935 solver.cpp:340] Iteration 6500, Testing net (#0)
+I1008 13:11:40.903012 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:11:40.903019 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:11:40.903023 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:11:40.903028 55935 net.cpp:693] Ignoring source layer data
+I1008 13:11:40.903056 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:11:40.903064 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:11:40.903069 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:11:40.903075 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:11:40.903080 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:11:40.903084 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:11:40.903089 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:11:40.903091 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:11:40.903095 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:11:40.903100 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:11:40.903103 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:11:40.903107 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:11:40.903111 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:11:40.903115 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:11:40.903120 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:11:43.543198 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:11:45.939061 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:11:47.933140 55935 solver.cpp:407]     Test net output #0: accuracy = 0.560525
+I1008 13:11:48.096176 55935 solver.cpp:231] Iteration 6500, loss = 0.00315739
+I1008 13:11:48.096230 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:11:48.096238 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:11:48.096246 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.00315738 (* 1 = 0.00315738 loss)
+I1008 13:11:48.096254 55935 sgd_solver.cpp:106] Iteration 6500, lr = 0.00022065
+I1008 13:12:47.918959 55935 solver.cpp:457] Snapshotting to binary proto file models/JAN/alexnet/trained_model_iter_6640.caffemodel
+I1008 13:12:49.079398 55935 sgd_solver.cpp:273] Snapshotting solver state to binary proto file models/JAN/alexnet/trained_model_iter_6640.solverstate
+I1008 13:13:01.350162 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:15:22.729538 55935 solver.cpp:340] Iteration 7000, Testing net (#0)
+I1008 13:15:22.729809 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:15:22.729837 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:15:22.729846 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:15:22.729854 55935 net.cpp:693] Ignoring source layer data
+I1008 13:15:22.729915 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:15:22.729926 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:15:22.729935 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:15:22.729943 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:15:22.729951 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:15:22.729959 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:15:22.729969 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:15:22.729975 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:15:22.729984 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:15:22.729991 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:15:22.730000 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:15:22.730007 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:15:22.730015 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:15:22.730022 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:15:22.730031 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:15:24.668730 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:15:27.042493 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:15:29.389693 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:15:29.725775 55935 solver.cpp:407]     Test net output #0: accuracy = 0.549876
+I1008 13:15:29.899353 55935 solver.cpp:231] Iteration 7000, loss = 0.00104026
+I1008 13:15:29.899405 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:15:29.899413 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:15:29.899421 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.00104025 (* 1 = 0.00104025 loss)
+I1008 13:15:29.899430 55935 sgd_solver.cpp:106] Iteration 7000, lr = 0.000210224
+I1008 13:19:04.278247 55935 solver.cpp:340] Iteration 7500, Testing net (#0)
+I1008 13:19:04.278527 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:19:04.278556 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:19:04.278565 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:19:04.278573 55935 net.cpp:693] Ignoring source layer data
+I1008 13:19:04.278861 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:19:04.278883 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:19:04.278892 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:19:04.278900 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:19:04.278908 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:19:04.278918 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:19:04.278924 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:19:04.278933 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:19:04.278939 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:19:04.278949 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:19:04.278956 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:19:04.278964 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:19:04.278971 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:19:04.279016 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:19:04.279024 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:19:05.429849 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:19:07.876101 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:19:10.258599 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:19:11.344260 55935 solver.cpp:407]     Test net output #0: accuracy = 0.545616
+I1008 13:19:11.507205 55935 solver.cpp:231] Iteration 7500, loss = 0.0191098
+I1008 13:19:11.507249 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:19:11.507256 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:19:11.507262 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.0191098 (* 1 = 0.0191098 loss)
+I1008 13:19:11.507272 55935 sgd_solver.cpp:106] Iteration 7500, lr = 0.00020088
+I1008 13:22:44.895288 55935 solver.cpp:340] Iteration 8000, Testing net (#0)
+I1008 13:22:44.895555 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:22:44.895582 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:22:44.895591 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:22:44.895598 55935 net.cpp:693] Ignoring source layer data
+I1008 13:22:44.895655 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:22:44.895666 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:22:44.895674 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:22:44.895683 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:22:44.895691 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:22:44.895699 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:22:44.895706 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:22:44.895714 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:22:44.895723 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:22:44.895731 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:22:44.895738 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:22:44.895746 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:22:44.895756 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:22:44.895763 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:22:44.895771 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:22:45.145961 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:22:47.781867 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:22:50.175309 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:22:51.987668 55935 solver.cpp:407]     Test net output #0: accuracy = 0.548456
+I1008 13:22:52.151083 55935 solver.cpp:231] Iteration 8000, loss = 0.000404372
+I1008 13:22:52.151129 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:22:52.151135 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:22:52.151141 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000404363 (* 1 = 0.000404363 loss)
+I1008 13:22:52.151154 55935 sgd_solver.cpp:106] Iteration 8000, lr = 0.00019245
+I1008 13:24:35.511066 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:26:27.582605 55935 solver.cpp:340] Iteration 8500, Testing net (#0)
+I1008 13:26:27.582828 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:26:27.582856 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:26:27.582865 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:26:27.582873 55935 net.cpp:693] Ignoring source layer data
+I1008 13:26:27.582964 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:26:27.582976 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:26:27.582985 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:26:27.582993 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:26:27.583001 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:26:27.583009 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:26:27.583017 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:26:27.583025 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:26:27.583032 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:26:27.583040 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:26:27.583050 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:26:27.583056 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:26:27.583065 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:26:27.583071 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:26:27.583081 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:26:29.752498 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:26:32.276634 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:26:34.728272 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:26:34.905722 55935 solver.cpp:407]     Test net output #0: accuracy = 0.553781
+I1008 13:26:35.068858 55935 solver.cpp:231] Iteration 8500, loss = 0.000140369
+I1008 13:26:35.068905 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:26:35.068913 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:26:35.068919 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000140362 (* 1 = 0.000140362 loss)
+I1008 13:26:35.068931 55935 sgd_solver.cpp:106] Iteration 8500, lr = 0.000184802
+I1008 13:30:06.317286 55935 solver.cpp:340] Iteration 9000, Testing net (#0)
+I1008 13:30:06.317481 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:30:06.317489 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:30:06.317493 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:30:06.317497 55935 net.cpp:693] Ignoring source layer data
+I1008 13:30:06.317637 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:30:06.317649 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:30:06.317653 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:30:06.317657 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:30:06.317662 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:30:06.317665 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:30:06.317669 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:30:06.317672 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:30:06.317677 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:30:06.317680 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:30:06.317684 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:30:06.317687 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:30:06.317692 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:30:06.317695 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:30:06.317699 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:30:07.655459 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:30:10.106403 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:30:12.489068 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:30:13.409389 55935 solver.cpp:407]     Test net output #0: accuracy = 0.554491
+I1008 13:30:13.577250 55935 solver.cpp:231] Iteration 9000, loss = 0.000165981
+I1008 13:30:13.577301 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:30:13.577311 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:30:13.577317 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000165983 (* 1 = 0.000165983 loss)
+I1008 13:30:13.577329 55935 sgd_solver.cpp:106] Iteration 9000, lr = 0.000177828
+I1008 13:33:44.397686 55935 solver.cpp:340] Iteration 9500, Testing net (#0)
+I1008 13:33:44.397917 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:33:44.397938 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:33:44.397944 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:33:44.397950 55935 net.cpp:693] Ignoring source layer data
+I1008 13:33:44.398000 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:33:44.398008 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:33:44.398015 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:33:44.398020 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:33:44.398027 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:33:44.398033 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:33:44.398039 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:33:44.398044 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:33:44.398051 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:33:44.398057 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:33:44.398063 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:33:44.398068 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:33:44.398075 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:33:44.398082 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:33:44.398087 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:33:44.866641 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:33:47.411744 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:33:49.797022 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:33:51.456140 55935 solver.cpp:407]     Test net output #0: accuracy = 0.548456
+I1008 13:33:51.619194 55935 solver.cpp:231] Iteration 9500, loss = 0.00018863
+I1008 13:33:51.619240 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:33:51.619246 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:33:51.619252 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000188631 (* 1 = 0.000188631 loss)
+I1008 13:33:51.619263 55935 sgd_solver.cpp:106] Iteration 9500, lr = 0.000171438
+I1008 13:36:00.154196 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:37:22.760236 55935 solver.cpp:340] Iteration 10000, Testing net (#0)
+I1008 13:37:22.760479 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:37:22.760509 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:37:22.760519 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:37:22.760526 55935 net.cpp:693] Ignoring source layer data
+I1008 13:37:22.760776 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:37:22.760797 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:37:22.760807 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:37:22.760815 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:37:22.760823 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:37:22.760830 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:37:22.760839 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:37:22.760848 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:37:22.760885 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:37:22.760895 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:37:22.760903 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:37:22.760910 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:37:22.760918 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:37:22.760926 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:37:22.760934 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:37:24.965634 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:37:27.320528 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:37:29.658536 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:37:29.677255 55935 solver.cpp:407]     Test net output #0: accuracy = 0.554491
+I1008 13:37:29.851536 55935 solver.cpp:231] Iteration 10000, loss = 0.000983984
+I1008 13:37:29.851600 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:37:29.851610 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:37:29.851617 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000983986 (* 1 = 0.000983986 loss)
+I1008 13:37:29.851631 55935 sgd_solver.cpp:106] Iteration 10000, lr = 0.00016556
+I1008 13:41:03.080482 55935 solver.cpp:340] Iteration 10500, Testing net (#0)
+I1008 13:41:03.080663 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:41:03.080672 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:41:03.080675 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:41:03.080678 55935 net.cpp:693] Ignoring source layer data
+I1008 13:41:03.080713 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:41:03.080719 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:41:03.080724 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:41:03.080726 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:41:03.080730 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:41:03.080734 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:41:03.080739 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:41:03.080741 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:41:03.080745 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:41:03.080750 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:41:03.080754 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:41:03.080756 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:41:03.080760 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:41:03.080765 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:41:03.080768 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:41:04.615386 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:41:07.059892 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:41:09.448837 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:41:10.203652 55935 solver.cpp:407]     Test net output #0: accuracy = 0.550941
+I1008 13:41:10.367362 55935 solver.cpp:231] Iteration 10500, loss = 0.000115469
+I1008 13:41:10.367408 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:41:10.367414 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:41:10.367420 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000115474 (* 1 = 0.000115474 loss)
+I1008 13:41:10.367429 55935 sgd_solver.cpp:106] Iteration 10500, lr = 0.000160131
+I1008 13:44:42.717458 55935 solver.cpp:340] Iteration 11000, Testing net (#0)
+I1008 13:44:42.717665 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:44:42.717674 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:44:42.717679 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:44:42.717681 55935 net.cpp:693] Ignoring source layer data
+I1008 13:44:42.717830 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:44:42.717842 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:44:42.717846 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:44:42.717850 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:44:42.717854 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:44:42.717859 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:44:42.717862 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:44:42.717865 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:44:42.717870 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:44:42.717875 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:44:42.717877 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:44:42.717881 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:44:42.717886 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:44:42.717890 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:44:42.717893 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:44:43.401542 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:44:45.959152 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:44:48.366259 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:44:49.886095 55935 solver.cpp:407]     Test net output #0: accuracy = 0.554491
+I1008 13:44:50.051213 55935 solver.cpp:231] Iteration 11000, loss = 0.0012348
+I1008 13:44:50.051260 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:44:50.051268 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:44:50.051275 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.0012348 (* 1 = 0.0012348 loss)
+I1008 13:44:50.051283 55935 sgd_solver.cpp:106] Iteration 11000, lr = 0.000155101
+I1008 13:47:30.230486 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:48:22.771102 55935 solver.cpp:340] Iteration 11500, Testing net (#0)
+I1008 13:48:22.771353 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:48:22.771383 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:48:22.771392 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:48:22.771399 55935 net.cpp:693] Ignoring source layer data
+I1008 13:48:22.771459 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:48:22.771471 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:48:22.771481 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:48:22.771487 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:48:22.771495 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:48:22.771502 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:48:22.771512 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:48:22.771519 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:48:22.771528 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:48:22.771534 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:48:22.771544 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:48:22.771551 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:48:22.771559 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:48:22.771566 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:48:22.771608 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:48:25.244141 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:48:27.776999 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:48:30.022986 55935 solver.cpp:407]     Test net output #0: accuracy = 0.56017
+I1008 13:48:30.192196 55935 solver.cpp:231] Iteration 11500, loss = 5.60789e-05
+I1008 13:48:30.192245 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:48:30.192255 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:48:30.192261 55935 solver.cpp:247]     Train net output #2: softmax_loss = 5.60736e-05 (* 1 = 5.60736e-05 loss)
+I1008 13:48:30.192275 55935 sgd_solver.cpp:106] Iteration 11500, lr = 0.000150424
+I1008 13:48:57.773564 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:52:02.669726 55935 solver.cpp:340] Iteration 12000, Testing net (#0)
+I1008 13:52:02.669855 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:52:02.669863 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:52:02.669867 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:52:02.669870 55935 net.cpp:693] Ignoring source layer data
+I1008 13:52:02.669901 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:52:02.669909 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:52:02.669911 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:52:02.669915 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:52:02.669919 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:52:02.669924 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:52:02.669927 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:52:02.669931 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:52:02.669934 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:52:02.669939 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:52:02.669944 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:52:02.669946 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:52:02.669950 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:52:02.669955 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:52:02.669958 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:52:04.359871 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:52:06.806915 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:52:09.249346 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:52:09.854287 55935 solver.cpp:407]     Test net output #0: accuracy = 0.554491
+I1008 13:52:10.018952 55935 solver.cpp:231] Iteration 12000, loss = 0.000596739
+I1008 13:52:10.018996 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:52:10.019003 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:52:10.019009 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000596742 (* 1 = 0.000596742 loss)
+I1008 13:52:10.019019 55935 sgd_solver.cpp:106] Iteration 12000, lr = 0.000146064
+I1008 13:55:41.657536 55935 solver.cpp:340] Iteration 12500, Testing net (#0)
+I1008 13:55:41.657730 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:55:41.657750 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:55:41.657754 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:55:41.657757 55935 net.cpp:693] Ignoring source layer data
+I1008 13:55:41.657793 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:55:41.657800 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:55:41.657826 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:55:41.657830 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:55:41.657835 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:55:41.657838 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:55:41.657841 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:55:41.657845 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:55:41.657847 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:55:41.657851 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:55:41.657855 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:55:41.657857 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:55:41.657861 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:55:41.657865 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:55:41.657867 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:55:42.541229 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:55:44.965492 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:55:47.405426 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:55:48.732697 55935 solver.cpp:407]     Test net output #0: accuracy = 0.559105
+I1008 13:55:48.896610 55935 solver.cpp:231] Iteration 12500, loss = 0.000538635
+I1008 13:55:48.896659 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:55:48.896668 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:55:48.896674 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000538641 (* 1 = 0.000538641 loss)
+I1008 13:55:48.896682 55935 sgd_solver.cpp:106] Iteration 12500, lr = 0.000141987
+I1008 13:58:58.544754 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:59:21.405649 55935 solver.cpp:340] Iteration 13000, Testing net (#0)
+I1008 13:59:21.405704 55935 net.cpp:693] Ignoring source layer source_data
+I1008 13:59:21.405710 55935 net.cpp:693] Ignoring source layer target_data
+I1008 13:59:21.405715 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 13:59:21.405719 55935 net.cpp:693] Ignoring source layer data
+I1008 13:59:21.405750 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 13:59:21.405757 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 13:59:21.405762 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 13:59:21.405766 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 13:59:21.405769 55935 net.cpp:693] Ignoring source layer silence
+I1008 13:59:21.405773 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 13:59:21.405777 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 13:59:21.405781 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 13:59:21.405786 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 13:59:21.405799 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 13:59:21.405803 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 13:59:21.405807 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 13:59:21.405812 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 13:59:21.405814 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 13:59:21.405819 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 13:59:24.052508 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:59:26.449699 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 13:59:28.505455 55935 solver.cpp:407]     Test net output #0: accuracy = 0.5623
+I1008 13:59:28.669513 55935 solver.cpp:231] Iteration 13000, loss = 0.000227834
+I1008 13:59:28.669747 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:59:28.669813 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 13:59:28.669847 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000227838 (* 1 = 0.000227838 loss)
+I1008 13:59:28.669872 55935 sgd_solver.cpp:106] Iteration 13000, lr = 0.000138167
+I1008 14:00:29.833824 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 14:03:07.088766 55935 solver.cpp:340] Iteration 13500, Testing net (#0)
+I1008 14:03:07.088942 55935 net.cpp:693] Ignoring source layer source_data
+I1008 14:03:07.088949 55935 net.cpp:693] Ignoring source layer target_data
+I1008 14:03:07.088953 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 14:03:07.088958 55935 net.cpp:693] Ignoring source layer data
+I1008 14:03:07.088986 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 14:03:07.088994 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 14:03:07.088997 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 14:03:07.089001 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 14:03:07.089004 55935 net.cpp:693] Ignoring source layer silence
+I1008 14:03:07.089010 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 14:03:07.089013 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 14:03:07.089017 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 14:03:07.089021 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 14:03:07.089026 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 14:03:07.089030 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 14:03:07.089033 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 14:03:07.089037 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 14:03:07.089041 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 14:03:07.089046 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 14:03:08.969200 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 14:03:11.383886 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 14:03:13.771666 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 14:03:14.192112 55935 solver.cpp:407]     Test net output #0: accuracy = 0.556266
+I1008 14:03:14.356950 55935 solver.cpp:231] Iteration 13500, loss = 0.00627163
+I1008 14:03:14.357003 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 14:03:14.357012 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 14:03:14.357018 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.00627164 (* 1 = 0.00627164 loss)
+I1008 14:03:14.357029 55935 sgd_solver.cpp:106] Iteration 13500, lr = 0.000134578
+I1008 14:06:46.590847 55935 solver.cpp:340] Iteration 14000, Testing net (#0)
+I1008 14:06:46.591087 55935 net.cpp:693] Ignoring source layer source_data
+I1008 14:06:46.591119 55935 net.cpp:693] Ignoring source layer target_data
+I1008 14:06:46.591127 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 14:06:46.591135 55935 net.cpp:693] Ignoring source layer data
+I1008 14:06:46.591236 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 14:06:46.591254 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 14:06:46.591264 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 14:06:46.591272 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 14:06:46.591282 55935 net.cpp:693] Ignoring source layer silence
+I1008 14:06:46.591290 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 14:06:46.591300 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 14:06:46.591307 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 14:06:46.591316 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 14:06:46.591325 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 14:06:46.591374 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 14:06:46.591384 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 14:06:46.591394 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 14:06:46.591403 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 14:06:46.591410 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 14:06:47.670038 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 14:06:50.157830 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 14:06:52.551744 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 14:06:53.709739 55935 solver.cpp:407]     Test net output #0: accuracy = 0.55946
+I1008 14:06:53.873666 55935 solver.cpp:231] Iteration 14000, loss = 0.000739556
+I1008 14:06:53.873714 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 14:06:53.873723 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 14:06:53.873728 55935 solver.cpp:247]     Train net output #2: softmax_loss = 0.000739563 (* 1 = 0.000739563 loss)
+I1008 14:06:53.873736 55935 sgd_solver.cpp:106] Iteration 14000, lr = 0.000131199
+I1008 14:10:26.806885 55935 solver.cpp:340] Iteration 14500, Testing net (#0)
+I1008 14:10:26.807024 55935 net.cpp:693] Ignoring source layer source_data
+I1008 14:10:26.807040 55935 net.cpp:693] Ignoring source layer target_data
+I1008 14:10:26.807044 55935 net.cpp:693] Ignoring source layer target_label_silence
+I1008 14:10:26.807049 55935 net.cpp:693] Ignoring source layer data
+I1008 14:10:26.807080 55935 net.cpp:693] Ignoring source layer fc7_drop7_0_split
+I1008 14:10:26.807086 55935 net.cpp:693] Ignoring source layer fc8_fc8_new_0_split
+I1008 14:10:26.807090 55935 net.cpp:693] Ignoring source layer slice_fc7
+I1008 14:10:26.807095 55935 net.cpp:693] Ignoring source layer slice_fc8
+I1008 14:10:26.807098 55935 net.cpp:693] Ignoring source layer silence
+I1008 14:10:26.807102 55935 net.cpp:693] Ignoring source layer softmax_loss
+I1008 14:10:26.807106 55935 net.cpp:693] Ignoring source layer fc8_softmax
+I1008 14:10:26.807117 55935 net.cpp:693] Ignoring source layer slice_softmax
+I1008 14:10:26.807121 55935 net.cpp:693] Ignoring source layer source_softmax_slice_softmax_0_split
+I1008 14:10:26.807124 55935 net.cpp:693] Ignoring source layer target_softmax_slice_softmax_1_split
+I1008 14:10:26.807128 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7
+I1008 14:10:26.807132 55935 net.cpp:693] Ignoring source layer jmmd_loss_fc7_jmmd_loss_fc7_0_split
+I1008 14:10:26.807137 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax
+I1008 14:10:26.807139 55935 net.cpp:693] Ignoring source layer jmmd_loss_softmax_jmmd_loss_softmax_0_split
+I1008 14:10:26.807143 55935 net.cpp:693] Ignoring source layer silence_loss_value
+I1008 14:10:26.952993 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 14:10:29.557039 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 14:10:31.958567 55935 blocking_queue.cpp:50] Data layer prefetch queue empty
+I1008 14:10:33.853732 55935 solver.cpp:407]     Test net output #0: accuracy = 0.55733
+I1008 14:10:34.017913 55935 solver.cpp:231] Iteration 14500, loss = 6.74085e-05
+I1008 14:10:34.017962 55935 solver.cpp:247]     Train net output #0: jmmd_loss_fc7_jmmd_loss_fc7_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 14:10:34.017971 55935 solver.cpp:247]     Train net output #1: jmmd_loss_softmax_jmmd_loss_softmax_0_split_0 = 0 (* 0.3 = 0 loss)
+I1008 14:10:34.017976 55935 solver.cpp:247]     Train net output #2: softmax_loss = 6.74238e-05 (* 1 = 6.74238e-05 loss)
+I1008 14:10:34.017984 55935 sgd_solver.cpp:106] Iteration 14500, lr = 0.000128012
+I1008 14:12:02.087468 55935 blocking_queue.cpp:50] Data layer prefetch queue empty

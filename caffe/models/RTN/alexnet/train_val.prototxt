@@ -1,11 +1,11 @@
-name: "outer_product_amazon_to_webcam"
+name: "amazon_to_webcam"
 layer {
   name: "source_data"
   type: "ImageData"
   top: "source_data"
   top: "lp_labels"
   image_data_param {
-    source: "./data/office/webcam_list.txt"
+    source: "./data/office/amazon_list.txt"
     batch_size: 64
     shuffle: true
     new_height: 256
@@ -24,7 +24,7 @@ layer {
   top: "target_data"
   top: "target_label"
   image_data_param {
-    source: "./data/office/amazon_list.txt"
+    source: "./data/office/webcam_list.txt"
     batch_size: 64
     shuffle: true
     new_height: 256
@@ -43,7 +43,7 @@ layer {
   top: "data"
   top: "lp_labels"
   image_data_param {
-    source: "./data/office/amazon_list.txt"
+    source: "./data/office/webcam_list.txt"
     batch_size: 1
     shuffle: true
     new_height: 256

@@ -1,5 +1,5 @@
 net: "models/JAN/alexnet/train_val.prototxt"
-test_iter: 2817
+test_iter: 795 # target domain: amazon 2817, webcam 795, dslr 498
 test_interval: 500
 base_lr: 0.001
 lr_policy: "inv"
@@ -12,4 +12,5 @@ weight_decay: 0.0005
 snapshot: 60000
 snapshot_prefix: "models/JAN/alexnet/trained_model"
 snapshot_after_train: false
-solver_mode: GPU 
+solver_mode: GPU
+
