@@ -489,7 +489,7 @@ layer {
 #  bottom: "fc7_target"
 #  bottom: "source_softmax"
 #  bottom: "target_softmax"
-#  loss_weight: 0.3 # best 0.3 for our tasks, can be tuned within [0.1, 1.0]#  top: "jmmd_loss_fc7"
+#  loss_weight: 0.3 # best 0.3 for our tasks, can be tuned within [0.1, 1.0]
 #  top: "jmmd_loss_fc7"
 #  include: { phase: TRAIN }
 #}
