@@ -1,16 +1,23 @@
 # Xlearn
-Transfer Learning Library
+**Transfer Learning Library**<br>
+<br>
+The transfer learning library for the following paper:<br>
+* [Learning Transferable Features with Deep Adaptation Networks](http://ise.thss.tsinghua.edu.cn/~mlong/doc/deep-adaptation-networks-icml15.pdf) **(DAN)**
+* [Unsupervised Domain Adaptation with Residual Transfer Networks](http://ise.thss.tsinghua.edu.cn/~mlong/doc/residual-transfer-network-nips16.pdf) **(JAN)**
+* [Deep Transfer Learning with Joint Adaptation Networks](http://ise.thss.tsinghua.edu.cn/~mlong/doc/joint-adaptation-networks-icml17.pdf) **(RTN)** <br>
 
-This is the transfer learning library for the following paper:
-
-### Learning Transferable Features with Deep Adaptation Networks
-### Unsupervised Domain Adaptation with Residual Transfer Networks
-### Deep Transfer Learning with Joint Adaptation Networks
-
-The pytorch and tensorflow versions are under developing.
-
+This package will include **Caffe,PyTorch and TensorFlow** implementations for transfer learning.<br> 
+The pytorch and tensorflow versions are under developing.<br>
+The code was written by [Han Zhu](https://github.com/zhuhan1236), [Zhangjie Cao](https://github.com/caozhangjie), [Shichen Liu](https://github.com/ShichenLiu) and [Mingsheng Long](https://github.com/longmingsheng).<br>
+## Applications
+## Getting Started
+Refer to [Xlearn on Caffe](https://github.com/thuml/Xlearn/blob/master/caffe/README.md) to get started with our [Caffe version](https://github.com/thuml/Xlearn/tree/master/caffe).<br>
+## Datasets
+In `caffe/data/office/*.txt`, we give the lists of three domains in [Office](https://cs.stanford.edu/~jhoffman/domainadapt/#datasets_code) dataset.<br>
+<br>
+We have published the Image-Clef dataset we use [here](https://drive.google.com/file/d/0B9kJH0-rJ2uRS3JILThaQXJhQlk/view?usp=sharing).<br>
 ## Citation
-If you use this code for your research, please consider citing:
+If you use this code for your research, please consider citing:<br>
 ```
     @inproceedings{DBLP:conf/icml/LongC0J15,
       author    = {Mingsheng Long and
@@ -64,12 +71,12 @@ If you use this code for your research, please consider citing:
       bibsource = {dblp computer science bibliography, http://dblp.org}
     }
 ```
-
 ## Contact
-If you have any problem about our code, feel free to contact 
-- zhuhan10@gmail.com
-- caozhangjie14@gmail.com
-- liushichen95@gmail.com
-- longmingsheng@gmail.com
+If you have any problem about our code, feel free to contact<br>
+
+* zhuhan10@gmail.com
+* caozhangjie14@gmail.com
+* liushichen95@gmail.com
+* longmingsheng@gmail.com<br>
 
 or describe your problem in Issues.
