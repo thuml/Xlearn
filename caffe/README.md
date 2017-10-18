@@ -36,7 +36,7 @@ ResNet:
 "./build/tools/caffe train -solver models/JAN/resnet/solver.prototxt -weights models/deep-residual-networks/ResNet-50-model.caffemodel"
 ```
 
-## Note: Fine-tuning ResNet-50 on Caffe requires much more memory than AlexNet. And if you want to fine-tune ResNet-50 on Caffe, a small number of mini-batch (e.g. 16) should be used. You may have to try even smaller mini-batch if OUT-OF-MEMORY occurs.
+Note: Fine-tuning ResNet-50 on Caffe requires huge memory. And the ResNet-50 results reported in our ICML '17 paper does not use fine-tuning. If you want to fine-tune ResNet-50 based models on Caffe, a small number of mini-batch (e.g. 16) should be used to avoid OUT-OF-MEMORY.
 
 Parameter Tuning
 ---------------
@@ -44,4 +44,4 @@ In mmd-layer and jmmd-layer, parameter `loss_weight` can be tuned to give mmd/jm
 
 Task Change
 ---------------
-If you want to change the transfer task like change to other transfer tasks such as `amazon` to `dslr`. You need to modify the corresponding `train_val.prototxt` to change the source and target dataset. And you need to change the corresponding `test_iter` parameter in `solver.prototxt` to the size of the target dataset: `2817` for `amazon`, `795` for `webcam` and `498` for `dslr`. 
+If you want to change to other transfer tasks such as `amazon` to `dslr`. You need to modify the corresponding `train_val.prototxt` to change the source and target dataset. And you need to change the corresponding `test_iter` parameter in `solver.prototxt` to the size of the target dataset: `2817` for `amazon`, `795` for `webcam` and `498` for `dslr`. 
