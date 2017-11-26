@@ -14,7 +14,10 @@ void JMMDLossLayer<Dtype>::LayerSetUp(
   total_num_ = source_num_ + target_num_;
   kernel_num_ = this->layer_param_.jmmd_param().kernel_num(); 
   label_kernel_num_ = this->layer_param_.jmmd_param().label_kernel_num(); 
-  sigma_ = 1.68; // Pre-compute Gauss kernel bandwidth as the mean of pairwise squared distances
+  fix_gamma_ = this->layer_param_.jmmd_param().fix_gamma();
+  sigma_ = this->layer_param_.jmmd_param().sigma();
+  auto_sigma_ = this->layer_param_.jmmd_param().auto_sigma();
+  label_back_propagate_ = true;
   gamma_ = Dtype(-1);
   kernel_mul_ = this->layer_param_.jmmd_param().kernel_mul();
   label_kernel_mul_ = this->layer_param_.jmmd_param().label_kernel_mul();
@@ -27,7 +30,7 @@ void JMMDLossLayer<Dtype>::LayerSetUp(
   delta_.Reshape(1, 1, total_num_, total_num_);
   caffe_set(dim_, Dtype(1), diff_multiplier_.mutable_cpu_data());
   loss_weight_ = this->layer_param_.loss_weight(0);
-  train_iter_num_ = 0;
+  label_loss_weight_ = this->layer_param_.loss_weight(0);
 }
 
 template <typename Dtype>
@@ -49,14 +52,12 @@ void JMMDLossLayer<Dtype>::Reshape(
   diff_multiplier_.Reshape(1, 1, 1, dim_);
   caffe_set(dim_, Dtype(1), diff_multiplier_.mutable_cpu_data());
   delta_.Reshape(1, 1, total_num_, total_num_);
-  train_iter_num_ += 1;
 }
 
 template <typename Dtype>
 void JMMDLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
 }
-
 template <typename Dtype>
 void JMMDLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down,

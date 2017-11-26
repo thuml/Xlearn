@@ -38,12 +38,6 @@ class JMMDLossLayer : public LossLayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
   
-  /*virtual Dtype get_label_kernel(MMDParameter_LabelKernelMode kernel_mode, int source_label, */
-          //const Dtype* target_p, const int label_dim);
-  //virtual Dtype get_label_kernel(MMDParameter_LabelKernelMode kernel_mode, const Dtype* target_p1, 
-          //const Dtype* target_p2, const int label_dim);
-  //virtual Dtype get_label_kernel(MMDParameter_LabelKernelMode kernel_mode, const int source_label1,
-          /*const int source_label2);*/
 
   int source_num_;
   int target_num_;
@@ -53,14 +47,17 @@ class JMMDLossLayer : public LossLayer<Dtype> {
   Dtype kernel_mul_;
   Dtype gamma_;
   Dtype sigma_;
+  bool fix_gamma_;
   Blob<Dtype> diff_;
   vector<Blob<Dtype>*> kernel_val_;
   Blob<Dtype> diff_multiplier_;
   Dtype loss_weight_;
+  Dtype label_loss_weight_;
   Blob<Dtype> delta_;
   int label_kernel_num_;
   Dtype label_kernel_mul_;
-  int train_iter_num_;
+  bool auto_sigma_;
+  bool label_back_propagate_;
 };
 
 }  // namespace caffe
