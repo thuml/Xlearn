@@ -2484,19 +2484,38 @@ layer {
   include: { phase: TRAIN }
 }
 layer {
-  name: "jmmd_loss"
+  name: "fc7_jmmd_loss"
   type: "JMMDLoss"
   bottom: "bottleneck_source"
   bottom: "bottleneck_target"
   bottom: "source_softmax"
   bottom: "target_softmax"
-  loss_weight: 0.3 # best 0.3 for our tasks, can be tuned within [0.1, 1.0]
-  top: "jmmd_loss"
+  loss_weight: 0.3
+  top: "fc7_jmmd_loss"
+  jmmd_param {
+    kernel_num: 5
+    kernel_mul: 2.0
+    label_kernel_num: 1
+    label_kernel_mul: 2.0
+    sigma: 1.68
+  }
   include: { phase: TRAIN }
 }
 layer {
-  name: "silence_loss_value"
-  type: "Silence"
-  bottom: "jmmd_loss"
+  name: "fc8_jmmd_loss"
+  type: "JMMDLoss"
+  bottom: "source_softmax"
+  bottom: "target_softmax"
+  bottom: "source_softmax"
+  bottom: "target_softmax"
+  loss_weight: 0.3
+  top: "fc7_jmmd_loss"
+  jmmd_param {
+    kernel_num: 1
+    kernel_mul: 2.0
+    label_kernel_num: 1
+    label_kernel_mul: 2.0
+    sigma: 1.68
+  }
   include: { phase: TRAIN }
 }

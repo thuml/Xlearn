@@ -5,7 +5,7 @@ base_lr: 0.0003
 lr_policy: "inv"
 gamma: 0.001
 power: 0.75
-display: 500
+display: 1000
 max_iter: 30000
 momentum: 0.9
 weight_decay: 0.0005

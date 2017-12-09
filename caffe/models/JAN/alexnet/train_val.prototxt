@@ -488,7 +488,7 @@ layer {
   include: { phase: TRAIN }
 }
 layer {
-  name: "fc7_mmd_loss"
+  name: "fc7_jmmd_loss"
   type: "JMMDLoss"
   bottom: "source_fc7"
   bottom: "target_fc7"
@@ -501,7 +501,25 @@ layer {
     kernel_mul: 2.0
     label_kernel_num: 1
     label_kernel_mul: 2.0
-    sigma: 1.3
+    sigma: 1.68
+  }
+  include: { phase: TRAIN }
+}
+layer {
+  name: "fc8_jmmd_loss"
+  type: "JMMDLoss"
+  bottom: "softmax_source"
+  bottom: "softmax_target"
+  bottom: "softmax_source"
+  bottom: "softmax_target"
+  loss_weight: 0.3
+  top: "fc8_jmmd_loss"
+  jmmd_param {
+    kernel_num: 5
+    kernel_mul: 2.0
+    label_kernel_num: 1
+    label_kernel_mul: 2.0
+    sigma: 1.68
   }
   include: { phase: TRAIN }
 }
