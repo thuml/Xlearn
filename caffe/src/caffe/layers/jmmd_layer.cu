@@ -117,107 +117,6 @@ __global__ void CalculateProbRBFLabelKernel(const int n, const Dtype* source_p, 
 }
 
 template <typename Dtype>
-__global__ void CalculateOneOfKRBFLabelKernel(const int n, const Dtype* source_label, const Dtype* target_p,
-        const int source_num, const int total_num, const int label_dim, const Dtype sigma, Dtype* out) {
-  CUDA_KERNEL_LOOP(index, n) {
-      int index1 = index / total_num;
-      int index2 = index % total_num;
-      if(index1 < source_num && index2 < source_num){
-          //ss
-          out[index] = (source_label[index1] == source_label[index2]) ? Dtype(1) : exp(Dtype(-1));
-      }
-      else if(index1 < source_num && index2 >= source_num){
-          int offset = label_dim * (index2 - source_num);
-          Dtype sum = Dtype(0);
-          for(int j = 0;j < label_dim;++j){
-              sum += (j == source_label[index1]) ? 
-                  (Dtype(1) - target_p[offset + j]) * (Dtype(1) - target_p[offset + j]):
-                  target_p[offset + j] * target_p[offset + j];
-          }
-          out[index] = exp(-sum / sigma);
-      }
-      else if(index1 >= source_num && index2 < source_num){
-          //ts
-          int offset = label_dim * (index1 - source_num);
-          Dtype sum = Dtype(0);
-          for(int j = 0;j < label_dim;++j){
-              sum += (j == source_label[index2]) ? 
-                  (Dtype(1) - target_p[offset + j]) * (Dtype(1) - target_p[offset + j]):
-                  target_p[offset + j] * target_p[offset + j];
-          }
-          out[index] = exp(-sum / sigma);
-      }
-      else{
-          //tt
-          int offset1 = label_dim * (index1 - source_num);
-          int offset2 = label_dim * (index2 - source_num);
-          Dtype sum = Dtype(0);
-          for(int j = 0;j < label_dim;++j){
-              sum += (target_p[offset1 + j] - target_p[offset2 + j]) * (target_p[offset1 + j] - target_p[offset2 + j]);
-          }
-          out[index] = exp(-sum / sigma);
-      }
-  }
-}
-
-template <typename Dtype>
-__global__ void CalculateIdentifyLabelKernel(const int n, const Dtype* source_label, const Dtype* target_p,
-        const int source_num, const int total_num, const int label_dim, Dtype* out) {
-  CUDA_KERNEL_LOOP(index, n) {
-      int index1 = index / total_num;
-      int index2 = index % total_num;
-      if(index1 < source_num && index2 < source_num){
-          //ss
-          out[index] = (source_label[index1] == source_label[index2]) ? Dtype(1) : Dtype(0);
-      }
-      else if(index1 < source_num && index2 >= source_num){
-          int offset = label_dim * (index2 - source_num);
-          Dtype max = target_p[offset + (int)source_label[index1]];
-          out[index] = Dtype(1);
-          for(int j = 0;j < label_dim;++j){
-              if(target_p[offset + j] > max){
-                  out[index] = Dtype(0);
-                  break;
-              }
-          }
-      }
-      else if(index1 >= source_num && index2 < source_num){
-          //ts
-          int offset = label_dim * (index1 - source_num);
-          Dtype max = target_p[offset + (int)source_label[index2]];
-          out[index] = Dtype(1);
-          for(int j = 0;j < label_dim;++j){
-              if(target_p[offset + j] > max){
-                  out[index] = Dtype(0);
-                  break;
-              }
-          }
-      }
-      else{
-          //tt
-          int offset1 = label_dim * (index1 - source_num);
-          int offset2 = label_dim * (index2 - source_num);
-          Dtype max = Dtype(-1);
-          int max_index;
-          for(int j = 0;j < label_dim;++j){
-              if(target_p[offset1 + j] > max){
-                  max = target_p[offset1 + j];
-                  max_index = j;
-              }
-          }
-          out[index] = Dtype(1);
-          max = target_p[offset2 + max_index];
-          for(int j = 0;j < label_dim;++j){
-              if(target_p[offset2 + j] > max){
-                  out[index] = Dtype(0);
-                  break;
-              }
-          }
-      }
-  }
-}
-
-template <typename Dtype>
 void JMMDLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
     const Dtype* source = bottom[0]->gpu_data();
@@ -289,9 +188,9 @@ void JMMDLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
             }
             sigma_ = bandwidth / total_num_;
         }
-            CalculateProbRBFLabelKernel<Dtype><<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
-                nthreads, bottom[2]->gpu_data(), bottom[3]->gpu_data(),
-                source_num_, total_num_, label_dim, sigma_, label_kernel_num_, label_kernel_mul_, delta_.mutable_gpu_data());
+        CalculateProbRBFLabelKernel<Dtype><<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
+            nthreads, bottom[2]->gpu_data(), bottom[3]->gpu_data(),
+            source_num_, total_num_, label_dim, sigma_, label_kernel_num_, label_kernel_mul_, delta_.mutable_gpu_data());
     }
     else{
         caffe_gpu_set(total_num_ * total_num_, Dtype(1), delta_.mutable_gpu_data());
@@ -302,83 +201,28 @@ void JMMDLossLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 }
 
 template <typename Dtype>
-__global__ void CalculateDiff(const int n, const Dtype* source, const Dtype* target,
-        const int source_num, const int total_num, const int dim, const Dtype* kernel_val, 
-        const Dtype gamma, const Dtype* label_kernel, const Dtype* data, const int data_index, 
-        Dtype* source_diff, Dtype* target_diff) {
-  CUDA_KERNEL_LOOP(index, n) {
-      int oppo_index = index / dim;
-      int dim_offset = index % dim;
-      Dtype data1 = data[dim_offset];
-      Dtype data2 = (oppo_index >= source_num) ?
-          target[dim * (oppo_index - source_num) + dim_offset]: 
-          source[dim * oppo_index + dim_offset];
-      int kernel_index = data_index * total_num + oppo_index;
-      Dtype factor_of_diff = -2 * gamma * kernel_val[kernel_index] * label_kernel[kernel_index];
-      if(oppo_index >= source_num){
-          oppo_index -= source_num;
-          if(data_index >= source_num)
-              target_diff[oppo_index * dim + dim_offset] += factor_of_diff * (data2 - data1);
-          else
-              target_diff[oppo_index * dim + dim_offset] += -0.5 * factor_of_diff * (data2 - data1); 
-      }
-      else{
-          if(data_index < source_num)
-              source_diff[oppo_index * dim + dim_offset] += 0.25 * factor_of_diff * (data2 - data1);
-          else
-              source_diff[oppo_index * dim + dim_offset] += -0.5 * factor_of_diff * (data2 - data1);
-      }
-  }
-}
-
-template <typename Dtype>
 void JMMDLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down,
     const vector<Blob<Dtype>*>& bottom) {
     Dtype* source_diff = bottom[0]->mutable_gpu_diff();
     Dtype* target_diff = bottom[1]->mutable_gpu_diff();
-    Dtype* label_source_diff = (label_back_propagate_) ? bottom[2]->mutable_gpu_diff() : NULL;
-    Dtype* label_target_diff = (label_back_propagate_) ? bottom[3]->mutable_gpu_diff() : NULL;
-    int label_dim = (label_back_propagate_) ? bottom[2]->count() / bottom[2]->count(0, 1) : 0;
-    if(label_back_propagate_){
-        caffe_gpu_set(source_num_ * label_dim, Dtype(0), label_source_diff);
-        caffe_gpu_set(target_num_ * label_dim, Dtype(0), label_target_diff);
-    }
+    Dtype* label_source_diff = bottom[2]->mutable_gpu_diff();
+    Dtype* label_target_diff = bottom[3]->mutable_gpu_diff();
+    int label_dim = bottom[2]->count() / bottom[2]->count(0, 1);
+    caffe_gpu_set(source_num_ * label_dim, Dtype(0), label_source_diff);
+    caffe_gpu_set(target_num_ * label_dim, Dtype(0), label_target_diff);
     
     caffe_gpu_set(source_num_ * dim_, Dtype(0), source_diff);
     caffe_gpu_set(target_num_ * dim_, Dtype(0), target_diff);
-    /*
-    for(int i = 0;i < total_num_;++i){
-        int nthreads = total_num_ * dim_;
-        const Dtype* data = (i >= source_num_) ? 
-            (bottom[1]->gpu_data() + dim_ * (i - source_num_)) : 
-            (bottom[0]->gpu_data() + dim_ * i);
-        
-        Dtype gamma_times = pow(kernel_mul_, (Dtype)(kernel_num_ / 2));
-        Dtype kernel_gamma = gamma_ / gamma_times;
-        
-        for(int j = 0;j < kernel_num_;++j){
-            CalculateDiff<Dtype><<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
-                nthreads, bottom[0]->gpu_data(), bottom[1]->gpu_data(),
-                source_num_, total_num_, dim_, kernel_val_[j]->gpu_data(),
-                kernel_gamma, delta_.gpu_data(), data, i, 
-                bottom[0]->mutable_gpu_diff(), bottom[1]->mutable_gpu_diff());
-            kernel_gamma *= kernel_mul_;
-        }
-    }
-    caffe_gpu_scal(source_num_ * dim_, loss_weight_ / total_num_ / total_num_, bottom[0]->mutable_gpu_diff());
-    caffe_gpu_scal(target_num_ * dim_, loss_weight_ / total_num_ / total_num_, bottom[1]->mutable_gpu_diff());
-    */
+    
     if(source_num_ <= 1 || target_num_ <= 1) return;
     int sample_num = (source_num_ > target_num_) ? source_num_ : target_num_;
     int s1, s2, t1, t2;
     Dtype* tempX1 = diff_.mutable_gpu_diff() + total_num_ * total_num_;
     Dtype* tempX2 = diff_.mutable_gpu_diff() + total_num_ * total_num_ + dim_;
     Dtype* tempY1 = NULL, *tempY2 = NULL;
-    if(label_back_propagate_){
-        tempY1 = diff_.mutable_gpu_diff() + total_num_ * total_num_ + dim_ + dim_;
-        tempY2 = diff_.mutable_gpu_diff() + total_num_ * total_num_ + dim_ + dim_ + label_dim;
-    }
+    tempY1 = diff_.mutable_gpu_diff() + total_num_ * total_num_ + dim_ + dim_;
+    tempY2 = diff_.mutable_gpu_diff() + total_num_ * total_num_ + dim_ + dim_ + label_dim;
     for(int i = 0;i < sample_num;++i){
         s1 = rand() % source_num_;
         s2 = rand() % source_num_;
@@ -394,10 +238,10 @@ void JMMDLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         const Dtype* x_s2 = bottom[0]->gpu_data() + s2 * dim_;
         const Dtype* x_t1 = bottom[1]->gpu_data() + t1 * dim_;
         const Dtype* x_t2 = bottom[1]->gpu_data() + t2 * dim_;
-        const Dtype* y_s1 = (label_back_propagate_) ? bottom[2]->gpu_data() + s1 * label_dim : NULL;
-        const Dtype* y_s2 = (label_back_propagate_) ? bottom[2]->gpu_data() + s2 * label_dim : NULL;
-        const Dtype* y_t1 = (label_back_propagate_) ? bottom[3]->gpu_data() + t1 * label_dim : NULL;
-        const Dtype* y_t2 = (label_back_propagate_) ? bottom[3]->gpu_data() + t2 * label_dim : NULL;
+        const Dtype* y_s1 = bottom[2]->gpu_data() + s1 * label_dim;
+        const Dtype* y_s2 = bottom[2]->gpu_data() + s2 * label_dim;
+        const Dtype* y_t1 = bottom[3]->gpu_data() + t1 * label_dim;
+        const Dtype* y_t2 = bottom[3]->gpu_data() + t2 * label_dim;
         
         caffe_gpu_sub<Dtype>(dim_, x_s1, x_s2, tempX1);
         caffe_gpu_sub<Dtype>(dim_, x_s2, x_s1, tempX2);
@@ -417,15 +261,13 @@ void JMMDLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         caffe_gpu_scal(dim_, loss_weight_ * factor_for_diff / sample_num, tempX2);
         caffe_gpu_add(dim_, tempX1, source_diff + s1 * dim_, source_diff + s1 * dim_);
         caffe_gpu_add(dim_, tempX2, source_diff + s2 * dim_, source_diff + s2 * dim_);
-        if(label_back_propagate_){
-            caffe_gpu_sub<Dtype>(label_dim, y_s1, y_s2, tempY1);
-            caffe_gpu_sub<Dtype>(label_dim, y_s2, y_s1, tempY2);
-            factor_for_diff = (-2) / sigma_ * x_kernel * delta_.cpu_data()[s1 * total_num_ + s2];
-            caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY1);
-            caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY2);
-            caffe_gpu_add(label_dim, tempY1, label_source_diff + s1 * label_dim, label_source_diff + s1 * label_dim);
-            caffe_gpu_add(label_dim, tempY2, label_source_diff + s2 * label_dim, label_source_diff + s2 * label_dim);
-        }
+        caffe_gpu_sub<Dtype>(label_dim, y_s1, y_s2, tempY1);
+        caffe_gpu_sub<Dtype>(label_dim, y_s2, y_s1, tempY2);
+        factor_for_diff = (-2) / sigma_ * x_kernel * delta_.cpu_data()[s1 * total_num_ + s2];
+        caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY1);
+        caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY2);
+        caffe_gpu_add(label_dim, tempY1, label_source_diff + s1 * label_dim, label_source_diff + s1 * label_dim);
+        caffe_gpu_add(label_dim, tempY2, label_source_diff + s2 * label_dim, label_source_diff + s2 * label_dim);
          
         factor_for_diff = 0;
         caffe_gpu_sub<Dtype>(dim_, x_s1, x_t2, tempX1);
@@ -445,15 +287,13 @@ void JMMDLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         caffe_gpu_scal(dim_, loss_weight_ * factor_for_diff / sample_num, tempX2);
         caffe_gpu_add(dim_, tempX1, source_diff + s1 * dim_, source_diff + s1 * dim_);
         caffe_gpu_add(dim_, tempX2, target_diff + t2 * dim_, target_diff + t2 * dim_);
-        if(label_back_propagate_){
-            caffe_gpu_sub<Dtype>(label_dim, y_s1, y_t2, tempY1);
-            caffe_gpu_sub<Dtype>(label_dim, y_t2, y_s1, tempY2);
-            factor_for_diff = 2 / sigma_ * x_kernel * delta_.cpu_data()[s1 * total_num_ + source_num_ + t2];
-            caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY1);
-            caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY2);
-            caffe_gpu_add(label_dim, tempY1, label_source_diff + s1 * label_dim, label_source_diff + s1 * label_dim);
-            caffe_gpu_add(label_dim, tempY2, label_target_diff + t2 * label_dim, label_target_diff + t2 * label_dim);
-        }
+        caffe_gpu_sub<Dtype>(label_dim, y_s1, y_t2, tempY1);
+        caffe_gpu_sub<Dtype>(label_dim, y_t2, y_s1, tempY2);
+        factor_for_diff = 2 / sigma_ * x_kernel * delta_.cpu_data()[s1 * total_num_ + source_num_ + t2];
+        caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY1);
+        caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY2);
+        caffe_gpu_add(label_dim, tempY1, label_source_diff + s1 * label_dim, label_source_diff + s1 * label_dim);
+        caffe_gpu_add(label_dim, tempY2, label_target_diff + t2 * label_dim, label_target_diff + t2 * label_dim);
          
         factor_for_diff = 0;
         caffe_gpu_sub<Dtype>(dim_, x_t1, x_s2, tempX1);
@@ -473,15 +313,13 @@ void JMMDLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         caffe_gpu_scal(dim_, loss_weight_ * factor_for_diff / sample_num, tempX2);
         caffe_gpu_add(dim_, tempX1, target_diff + t1 * dim_, target_diff + t1 * dim_);
         caffe_gpu_add(dim_, tempX2, source_diff + s2 * dim_, source_diff + s2 * dim_);
-        if(label_back_propagate_){
-            caffe_gpu_sub<Dtype>(label_dim, y_s2, y_t1, tempY1);
-            caffe_gpu_sub<Dtype>(label_dim, y_t1, y_s2, tempY2);
-            factor_for_diff = 2 / sigma_ * x_kernel * delta_.cpu_data()[(t1 + source_num_) * total_num_ + s2];
-            caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY1);
-            caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY2);
-            caffe_gpu_add(label_dim, tempY1, label_source_diff + s2 * label_dim, label_source_diff + s2 * label_dim);
-            caffe_gpu_add(label_dim, tempY2, label_target_diff + t1 * label_dim, label_target_diff + t1 * label_dim);
-        }
+        caffe_gpu_sub<Dtype>(label_dim, y_s2, y_t1, tempY1);
+        caffe_gpu_sub<Dtype>(label_dim, y_t1, y_s2, tempY2);
+        factor_for_diff = 2 / sigma_ * x_kernel * delta_.cpu_data()[(t1 + source_num_) * total_num_ + s2];
+        caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY1);
+        caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY2);
+        caffe_gpu_add(label_dim, tempY1, label_source_diff + s2 * label_dim, label_source_diff + s2 * label_dim);
+        caffe_gpu_add(label_dim, tempY2, label_target_diff + t1 * label_dim, label_target_diff + t1 * label_dim);
         
         factor_for_diff = 0;
         caffe_gpu_sub<Dtype>(dim_, x_t1, x_t2, tempX1);
@@ -501,15 +339,13 @@ void JMMDLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         caffe_gpu_scal(dim_, loss_weight_ * factor_for_diff / sample_num, tempX2);
         caffe_gpu_add(dim_, tempX1, target_diff + t1 * dim_, target_diff + t1 * dim_);
         caffe_gpu_add(dim_, tempX2, target_diff + t2 * dim_, target_diff + t2 * dim_);
-        if(label_back_propagate_){
-            caffe_gpu_sub<Dtype>(label_dim, y_t1, y_t2, tempY1);
-            caffe_gpu_sub<Dtype>(label_dim, y_t2, y_t1, tempY2);
-            factor_for_diff = (-2) / sigma_ * x_kernel * delta_.cpu_data()[(t1 + source_num_) * total_num_ + t2 + source_num_];
-            caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY1);
-            caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY2);
-            caffe_gpu_add(label_dim, tempY1, label_target_diff + t1 * label_dim, label_target_diff + t1 * label_dim);
-            caffe_gpu_add(label_dim, tempY2, label_target_diff + t2 * label_dim, label_target_diff + t2 * label_dim);
-        }
+        caffe_gpu_sub<Dtype>(label_dim, y_t1, y_t2, tempY1);
+        caffe_gpu_sub<Dtype>(label_dim, y_t2, y_t1, tempY2);
+        factor_for_diff = (-2) / sigma_ * x_kernel * delta_.cpu_data()[(t1 + source_num_) * total_num_ + t2 + source_num_];
+        caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY1);
+        caffe_gpu_scal(label_dim, label_loss_weight_ * factor_for_diff / sample_num, tempY2);
+        caffe_gpu_add(label_dim, tempY1, label_target_diff + t1 * label_dim, label_target_diff + t1 * label_dim);
+        caffe_gpu_add(label_dim, tempY2, label_target_diff + t2 * label_dim, label_target_diff + t2 * label_dim);
     }
 }
 

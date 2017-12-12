@@ -57,7 +57,6 @@ class JMMDLossLayer : public LossLayer<Dtype> {
   int label_kernel_num_;
   Dtype label_kernel_mul_;
   bool auto_sigma_;
-  bool label_back_propagate_;
 };
 
 }  // namespace caffe

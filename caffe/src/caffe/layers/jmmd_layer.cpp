@@ -17,7 +17,6 @@ void JMMDLossLayer<Dtype>::LayerSetUp(
   fix_gamma_ = this->layer_param_.jmmd_param().fix_gamma();
   sigma_ = this->layer_param_.jmmd_param().sigma();
   auto_sigma_ = this->layer_param_.jmmd_param().auto_sigma();
-  label_back_propagate_ = true;
   gamma_ = Dtype(-1);
   kernel_mul_ = this->layer_param_.jmmd_param().kernel_mul();
   label_kernel_mul_ = this->layer_param_.jmmd_param().label_kernel_mul();
