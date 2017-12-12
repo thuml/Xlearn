@@ -6,15 +6,17 @@ layer {
   top: "source_label"
   image_data_param {
     source: "./data/office/amazon_list.txt"
+    # source: "./data/office/webcam_list.txt"
+    # source: "./data/office/dslr_list.txt"
     batch_size: 16
-    new_height: 224
-    new_width: 224
+    new_height: 256
+    new_width: 256
     shuffle: true
   }
   transform_param {
-    crop_size: 224
+    crop_size: 227
     mirror: true
-    mean_file: "./models/deep-residual-networks/ResNet_mean.binaryproto"
+    mean_file: "./data/ilsvrc12/imagenet_mean.binaryproto"
   }
   include: { phase: TRAIN }
 }
@@ -25,15 +27,17 @@ layer {
   top: "target_label"
   image_data_param {
     source: "./data/office/webcam_list.txt"
+    # source: "./data/office/dslr_list.txt"
+    # source: "./data/office/amazon_list.txt"
     batch_size: 16
-    new_height: 224
-    new_width: 224
+    new_height: 256
+    new_width: 256
     shuffle: true
   }
   transform_param {
-    crop_size: 224
+    crop_size: 227
     mirror: true
-    mean_file: "./models/deep-residual-networks/ResNet_mean.binaryproto"
+    mean_file: "./data/ilsvrc12/imagenet_mean.binaryproto"
   }
   include: { phase: TRAIN }
 }
@@ -50,15 +54,17 @@ layer {
   top: "label"
   image_data_param {
     source: "./data/office/webcam_list.txt"
+    # source: "./data/office/dslr_list.txt"
+    # source: "./data/office/amazon_list.txt"
     batch_size: 1
-    new_height: 224
-    new_width: 224
-    shuffle: false
+    new_height: 256
+    new_width: 256
+    shuffle: true
   }
   transform_param {
-    crop_size: 224
+    crop_size: 227
     mirror: false
-    mean_file: "./models/deep-residual-networks/ResNet_mean.binaryproto"
+    mean_file: "./data/ilsvrc12/imagenet_mean.binaryproto"
   }
   include: { phase: TEST }
 }
@@ -2509,7 +2515,7 @@ layer {
   bottom: "source_softmax"
   bottom: "target_softmax"
   loss_weight: 0.3
-  top: "fc7_jmmd_loss"
+  top: "fc8_jmmd_loss"
   jmmd_param {
     kernel_num: 1
     kernel_mul: 2.0
