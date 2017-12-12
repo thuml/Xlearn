@@ -6,13 +6,6 @@ layer {
   top: "source_label"
   image_data_param {
     source: "./data/office/amazon_list.txt"
-    # source: "./data/office/webcam_list.txt"
-    # source: "./data/office/dslr_list.txt"
-    # source: "/home/liushichen/playground/taskcv-2017-public/classification/data/train/train_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Art_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Clipart_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Product_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Real_World_list.txt"
     batch_size: 64
     new_height: 256
     new_width: 256
@@ -32,13 +25,6 @@ layer {
   top: "target_label"
   image_data_param {
     source: "./data/office/webcam_list.txt"
-    # source: "./data/office/dslr_list.txt"
-    # source: "./data/office/amazon_list.txt"
-    # source: "/home/liushichen/playground/taskcv-2017-public/classification/data/validation/test_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Art_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Real_World_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Clipart_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Product_list.txt"
     batch_size: 64
     new_height: 256
     new_width: 256
@@ -64,13 +50,6 @@ layer {
   top: "label"
   image_data_param {
     source: "./data/office/webcam_list.txt"
-    # source: "./data/office/dslr_list.txt"
-    # source: "./data/office/amazon_list.txt"
-    # source: "/home/liushichen/playground/taskcv-2017-public/classification/data/validation/test_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Art_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Real_World_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Clipart_list.txt"
-    # source: "/home/dataset/office-H/OfficeHomeDataset_10072016/Product_list.txt"
     batch_size: 1
     new_height: 256
     new_width: 256
