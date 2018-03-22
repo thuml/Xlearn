@@ -1,16 +1,17 @@
-# Xlearn
-Transfer Learning Library
+# Deep Transfer Learning on PyTorch
 
-This is the transfer learning library for the following paper:
+This is a PyTorch library for deep transfer learning. We use the PyTorch version 0.2.0\_3. 
 
-### Learning Transferable Features with Deep Adaptation Networks
-### Unsupervised Domain Adaptation with Residual Transfer Networks
-### Deep Transfer Learning with Joint Adaptation Networks
+Data Preparation
+---------------
+In `data/office/*.txt`, we give the lists of three domains in [Office](https://cs.stanford.edu/~jhoffman/domainadapt/#datasets_code) dataset.
 
-The tensorflow versions are under developing.
+Training Model
+---------------
 
 ## Citation
-If you use this code for your research, please consider citing:
+If you use this library for your research, we would be pleased if you cite the following papers:
+
 ```
     @inproceedings{DBLP:conf/icml/LongC0J15,
       author    = {Mingsheng Long and
@@ -66,9 +67,6 @@ If you use this code for your research, please consider citing:
 ```
 
 ## Contact
-If you have any problem about our code, feel free to contact 
+If you have any problem about this library, please create an Issue or send us an Email at:
 - caozhangjie14@gmail.com
-- liushichen95@gmail.com
 - longmingsheng@gmail.com
-
-or describe your problem in Issues.
