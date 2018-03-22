@@ -2,12 +2,29 @@
 
 This is a PyTorch library for deep transfer learning. We use the PyTorch version 0.2.0\_3. 
 
-Data Preparation
+## Prerequisites
+Linux or OSX
+
+NVIDIA GPU + CUDA-7.5 or CUDA-8.0 and corresponding CuDNN
+
+PyTorch
+
+Python 2.7 (We have not test on Python 3 yet.)
+
+## Data Preparation
 ---------------
 In `data/office/*.txt`, we give the lists of three domains in [Office](https://cs.stanford.edu/~jhoffman/domainadapt/#datasets_code) dataset.
 
-Training Model
+## Training Model
 ---------------
+In `src` directory, you can use the following command to train the model.
+```
+python train.py gpu_id
+```
+
+To train your model with different methods or different datasets or different optimizers, you can construct your own configuration. We have given a example configuration in `train.py`. We will give some explanation.
+
+`config['loss']` is the loss configuration, you need to set the `name` parameter as the name of the loss you want to use `DAN`, `RTN` or `JAN`. You also need to set the `trade_off` parameter to set the trade-off between the classification loss and transfer loss. If you'd like to use different parateters for the specific loss, you can set `params`, which is a dictionary including the parameters of the specific loss. The parameters of each specific loss is in `loss.py`.
 
 ## Citation
 If you use this library for your research, we would be pleased if you cite the following papers:
