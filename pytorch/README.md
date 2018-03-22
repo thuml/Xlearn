@@ -26,6 +26,8 @@ To train your model with different methods or different datasets or different op
 
 `config['loss']` is the loss configuration, you need to set the `name` parameter as the name of the loss you want to use `DAN`, `RTN` or `JAN`. You also need to set the `trade_off` parameter to set the trade-off between the classification loss and transfer loss. If you'd like to use different parateters for the specific loss, you can set `params`, which is a dictionary including the parameters of the specific loss. The parameters of each specific loss is in `loss.py`.
 
+`config['data']` set the input dataset parameters. You can change the dataset to your dataset here.
+
 ## Citation
 If you use this library for your research, we would be pleased if you cite the following papers:
 
