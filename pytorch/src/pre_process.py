@@ -71,8 +71,8 @@ def image_test(resize_size=256, crop_size=224):
                                    std=[0.229, 0.224, 0.225])
   #ten crops for image when validation, input the data_transforms dictionary
   start_first = 0
-  start_center = (resize_size - crop_size - 1) / 2
-  start_last = resize_size - crop_size - 1
+  start_center = (resize_size - crop_size) / 2
+  start_last = resize_size - crop_size
  
   return transforms.Compose([
     ResizeImage(resize_size),
@@ -86,8 +86,8 @@ def image_test_10crop(resize_size=256, crop_size=224):
                                    std=[0.229, 0.224, 0.225])
   #ten crops for image when validation, input the data_transforms dictionary
   start_first = 0
-  start_center = (resize_size - crop_size - 1) / 2
-  start_last = resize_size - crop_size - 1
+  start_center = (resize_size - crop_size) / 2
+  start_last = resize_size - crop_size
   data_transforms = {}
   data_transforms['val0'] = transforms.Compose([
       ResizeImage(resize_size),ForceFlip(),
