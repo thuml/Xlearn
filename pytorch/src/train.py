@@ -84,23 +84,24 @@ def image_classification_test(loader, model, test_10crop=True, gpu=True):
                 all_label = torch.cat((all_label, labels.data.float()), 0)
     else:
         iter_test = iter(loader["test"])
-        data = iter_test.next()
-        inputs = data[0]
-        labels = data[1]
-        if gpu:
-            inputs = Variable(inputs.cuda())
-            labels = Variable(labels.cuda())
-        else:
-            inputs = Variable(inputs)
-            labels = Variable(labels)
-        outputs = model(inputs)
-        if start_test:
-            all_output = outputs.data.float()
-            all_label = labels.data.float()
-            start_test = False
-        else:
-            all_output = torch.cat((all_output, outputs.data.float()), 0)
-            all_label = torch.cat((all_label, labels.data.float()), 0)
+        for i in xrange(len(loader["test"])):
+            data = iter_test.next()
+            inputs = data[0]
+            labels = data[1]
+            if gpu:
+                inputs = Variable(inputs.cuda())
+                labels = Variable(labels.cuda())
+            else:
+                inputs = Variable(inputs)
+                labels = Variable(labels)
+            outputs = model(inputs)
+            if start_test:
+                all_output = outputs.data.float()
+                all_label = labels.data.float()
+                start_test = False
+            else:
+                all_output = torch.cat((all_output, outputs.data.float()), 0)
+                all_label = torch.cat((all_label, labels.data.float()), 0)
        
     _, predict = torch.max(all_output, 1)
     accuracy = torch.sum(torch.squeeze(predict).float() == all_label) / float(all_label.size()[0])
@@ -164,6 +165,8 @@ def transfer_classification(config):
         classifier_layer = nn.Linear(bottleneck_layer.out_features, class_num)
     else:
         classifier_layer = nn.Linear(base_network.output_num(), class_num)
+    for param in base_network.parameters():
+        param.requires_grad = False
 
     ## initialization
     if net_config["use_bottleneck"]:
@@ -183,10 +186,10 @@ def transfer_classification(config):
 
     ## collect parameters
     if net_config["use_bottleneck"]:
-        parameter_list = [{"params":base_network.parameters(), "lr":1}, {"params":bottleneck_layer.parameters(), "lr":10}, {"params":classifier_layer.parameters(), "lr":10}]
+        parameter_list = [{"params":bottleneck_layer.parameters(), "lr":10}, {"params":classifier_layer.parameters(), "lr":10}]
        
     else:
-        parameter_list = [{"params":base_network.parameters(), "lr":1}, {"params":classifier_layer.parameters(), "lr":10}]
+        parameter_list = [{"params":classifier_layer.parameters(), "lr":10}]
 
     ## add additional network for some methods
     if loss_config["name"] == "JAN":
@@ -223,7 +226,6 @@ def transfer_classification(config):
 
         loss_test = nn.BCELoss()
         ## train one iter
-        base_network.train(True)
         if net_config["use_bottleneck"]:
             bottleneck_layer.train(True)
         classifier_layer.train(True)
@@ -265,17 +267,22 @@ def transfer_classification(config):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Transfer Learning')
-    parser.add_argument('gpu_id', type=str, nargs='?', default='0', help="device id to run")
+    parser.add_argument('--gpu_id', type=str, nargs='?', default='0', help="device id to run")
+    parser.add_argument('--source', type=str, nargs='?', default='amazon', help="source data")
+    parser.add_argument('--target', type=str, nargs='?', default='webcam', help="target data")
+    parser.add_argument('--loss_name', type=str, nargs='?', default='JAN', help="loss name")
+    parser.add_argument('--tradeoff', type=float, nargs='?', default=1.0, help="tradeoff")
+    parser.add_argument('--using_bottleneck', type=int, nargs='?', default=0, help="whether to use bottleneck")
     args = parser.parse_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id 
 
     config = {}
-    config["num_iterations"] = 100000
+    config["num_iterations"] = 20000
     config["test_interval"] = 500
     config["prep"] = [{"name":"source", "type":"image", "test_10crop":True, "resize_size":256, "crop_size":224}, {"name":"target", "type":"image", "test_10crop":True, "resize_size":256, "crop_size":224}]
-    config["loss"] = {"name":"DAN", "trade_off":1.0 }
-    config["data"] = [{"name":"source", "type":"image", "list_path":{"train":"../data/office/amazon_list.txt"}, "batch_size":{"train":36, "test":4} }, {"name":"target", "type":"image", "list_path":{"train":"../data/office/webcam_list.txt"}, "batch_size":{"train":36, "test":4} }]
-    config["network"] = {"name":"ResNet50", "use_bottleneck":True, "bottleneck_dim":256}
+    config["loss"] = {"name":args.loss_name, "trade_off":args.tradeoff }
+    config["data"] = [{"name":"source", "type":"image", "list_path":{"train":"../data/office/"+args.source+"_list.txt"}, "batch_size":{"train":36, "test":4} }, {"name":"target", "type":"image", "list_path":{"train":"../data/office/"+args.target+"_list.txt"}, "batch_size":{"train":36, "test":4} }]
+    config["network"] = {"name":"ResNet50", "use_bottleneck":args.using_bottleneck, "bottleneck_dim":256}
     config["optimizer"] = {"type":"SGD", "optim_params":{"lr":1.0, "momentum":0.9, "weight_decay":0.0005, "nesterov":True}, "lr_type":"inv", "lr_param":{"init_lr":0.0003, "gamma":0.0003, "power":0.75} }
     print config["loss"]
     transfer_classification(config)
