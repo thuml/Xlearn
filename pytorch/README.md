@@ -19,8 +19,9 @@ In `data/office/*.txt`, we give the lists of three domains in [Office](https://c
 ---------------
 In `src` directory, you can use the following command to train the model.
 ```
-python train.py gpu_id
+./run.sh
 ```
+By modifying and running `run.sh`, you can conduct some experiments on different transfer learning tasks easily.
 
 To train your model with different methods or different datasets or different optimizers, you can construct your own configuration. We have given a example configuration in `train.py`. We will give some explanation.
 
