@@ -272,7 +272,7 @@ if __name__ == "__main__":
     parser.add_argument('--target', type=str, nargs='?', default='webcam', help="target data")
     parser.add_argument('--loss_name', type=str, nargs='?', default='JAN', help="loss name")
     parser.add_argument('--tradeoff', type=float, nargs='?', default=1.0, help="tradeoff")
-    parser.add_argument('--using_bottleneck', type=int, nargs='?', default=0, help="whether to use bottleneck")
+    parser.add_argument('--using_bottleneck', type=int, nargs='?', default=1, help="whether to use bottleneck")
     args = parser.parse_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id 
 
