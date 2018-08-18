@@ -9,6 +9,8 @@ This is the transfer learning library for the following paper:
 
 The tensorflow versions are under developing.
 
+Image-clef dataset is [here](https://drive.google.com/drive/u/2/folders/0B9kJH0-rJ2uRMnNWMHIzZHZSaU0).
+
 ## Citation
 If you use this code for your research, please consider citing:
 ```
