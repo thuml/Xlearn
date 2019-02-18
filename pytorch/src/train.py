@@ -104,7 +104,7 @@ def image_classification_test(loader, model, test_10crop=True, gpu=True):
                 all_label = torch.cat((all_label, labels.data.float()), 0)
        
     _, predict = torch.max(all_output, 1)
-    accuracy = torch.sum(torch.squeeze(predict).float() == all_label) / float(all_label.size()[0])
+    accuracy = torch.sum(torch.squeeze(predict).float() == all_label).item() / float(all_label.size()[0])
     return accuracy
 
 
