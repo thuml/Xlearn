@@ -29,13 +29,30 @@ def DAN(source, target, kernel_mul=2.0, kernel_num=5, fix_sigma=None):
     batch_size = int(source.size()[0])
     kernels = guassian_kernel(source, target,
         kernel_mul=kernel_mul, kernel_num=kernel_num, fix_sigma=fix_sigma)
-    loss = 0
-    for i in range(batch_size):
-        s1, s2 = i, (i+1)%batch_size
-        t1, t2 = s1+batch_size, s2+batch_size
-        loss += kernels[s1, s2] + kernels[t1, t2]
-        loss -= kernels[s1, t2] + kernels[s2, t1]
-    return loss / float(batch_size)
+
+    # Linear version
+    # loss = 0
+    # for i in range(batch_size):
+    #     s1, s2 = i, (i+1)%batch_size
+    #     t1, t2 = s1+batch_size, s2+batch_size
+    #     loss += kernels[s1, s2] + kernels[t1, t2]
+    #     loss -= kernels[s1, t2] + kernels[s2, t1]
+    # return loss / float(batch_size)
+
+    loss1 = 0
+    for s1 in range(batch_size):
+        for s2 in range(s1+1, batch_size):
+            t1, t2 = s1+batch_size, s2+batch_size
+            loss1 += kernels[s1, s2] + kernels[t1, t2]
+    loss1 = loss1 / float(batch_size * (batch_size - 1) / 2)
+
+    loss2 = 0
+    for s1 in range(batch_size):
+        for s2 in range(batch_size):
+            t1, t2 = s1+batch_size, s2+batch_size
+            loss2 -= kernels[s1, t2] + kernels[s2, t1]
+    loss2 = loss2 / float(batch_size * batch_size)
+    return loss1 + loss2
 
 def RTN():
     pass  
@@ -57,15 +74,30 @@ def JAN(source_list, target_list, kernel_muls=[2.0, 2.0], kernel_nums=[5, 1], fi
             joint_kernels = joint_kernels * kernels
         else:
             joint_kernels = kernels
-    
-    loss = 0
-    for i in range(batch_size):
-        s1, s2 = i, (i+1)%batch_size
-        t1, t2 = s1+batch_size, s2+batch_size
-        loss += joint_kernels[s1, s2] + joint_kernels[t1, t2]
-        loss -= joint_kernels[s1, t2] + joint_kernels[s2, t1]
-    return loss / float(batch_size)
 
+    # Linear version
+    # loss = 0
+    # for i in range(batch_size):
+    #     s1, s2 = i, (i+1)%batch_size
+    #     t1, t2 = s1+batch_size, s2+batch_size
+    #     loss += joint_kernels[s1, s2] + joint_kernels[t1, t2]
+    #     loss -= joint_kernels[s1, t2] + joint_kernels[s2, t1]
+    # return loss / float(batch_size)
+
+    loss1 = 0
+    for s1 in range(batch_size):
+        for s2 in range(s1 + 1, batch_size):
+            t1, t2 = s1 + batch_size, s2 + batch_size
+            loss1 += joint_kernels[s1, s2] + joint_kernels[t1, t2]
+    loss1 = loss1 / float(batch_size * (batch_size - 1) / 2)
+
+    loss2 = 0
+    for s1 in range(batch_size):
+        for s2 in range(batch_size):
+            t1, t2 = s1 + batch_size, s2 + batch_size
+            loss2 -= joint_kernels[s1, t2] + joint_kernels[s2, t1]
+    loss2 = loss2 / float(batch_size * batch_size)
+    return loss1 + loss2
 
 
 loss_dict = {"DAN":DAN, "RTN":RTN, "JAN":JAN}
