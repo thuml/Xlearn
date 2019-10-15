@@ -15,6 +15,23 @@ from torch.autograd import Variable
 
 optim_dict = {"SGD": optim.SGD}
 
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
+
 def image_classification_predict(loader, model, test_10crop=True, gpu=True):
     start_test = True
     if test_10crop:
@@ -104,7 +121,8 @@ def image_classification_test(loader, model, test_10crop=True, gpu=True):
                 all_label = torch.cat((all_label, labels.data.float()), 0)
        
     _, predict = torch.max(all_output, 1)
-    accuracy = torch.sum(torch.squeeze(predict).float() == all_label).item() / float(all_label.size()[0])
+    # accuracy = torch.sum(torch.squeeze(predict).float() == all_label).item() / float(all_label.size()[0])
+    accuracy = torch.sum(torch.squeeze(predict).float() == all_label) / float(all_label.size()[0])
     return accuracy
 
 
@@ -192,7 +210,7 @@ def transfer_classification(config):
         parameter_list = [{"params":classifier_layer.parameters(), "lr":10}]
 
     ## add additional network for some methods
-    if loss_config["name"] == "JAN":
+    if loss_config["name"] == "JAN" or loss_config["name"] == "JAN_Linear":
         softmax_layer = nn.Softmax()
         if use_gpu:
             softmax_layer = softmax_layer.cuda()
@@ -211,7 +229,7 @@ def transfer_classification(config):
     ## train   
     len_train_source = len(dset_loaders["source"]["train"]) - 1
     len_train_target = len(dset_loaders["target"]["train"]) - 1
-    transfer_loss_value = classifier_loss_value = total_loss_value = 0.0
+    mmd_meter = AverageMeter()
     for i in range(config["num_iterations"]):
         ## test in the train
         if i % config["test_interval"] == 0:
@@ -219,12 +237,14 @@ def transfer_classification(config):
             classifier_layer.train(False)
             if net_config["use_bottleneck"]:
                 bottleneck_layer.train(False)
-                print image_classification_test(dset_loaders["target"], nn.Sequential(base_network, bottleneck_layer, classifier_layer), test_10crop=prep_dict["target"]["test_10crop"], gpu=use_gpu)
+                test_acc =  image_classification_test(dset_loaders["target"], nn.Sequential(base_network, bottleneck_layer, classifier_layer), test_10crop=prep_dict["target"]["test_10crop"], gpu=use_gpu)
 
             else:
-                print image_classification_test(dset_loaders["target"], nn.Sequential(base_network, classifier_layer), test_10crop=prep_dict["target"]["test_10crop"], gpu=use_gpu)
+                test_acc = image_classification_test(dset_loaders["target"], nn.Sequential(base_network, classifier_layer), test_10crop=prep_dict["target"]["test_10crop"], gpu=use_gpu)
 
-        loss_test = nn.BCELoss()
+            print('Iter: %d, mmd = %.4f, test_acc = %.3f' % (i, mmd_meter.avg, test_acc))
+            mmd_meter.reset()
+
         ## train one iter
         if net_config["use_bottleneck"]:
             bottleneck_layer.train(True)
@@ -251,15 +271,17 @@ def transfer_classification(config):
 
         classifier_loss = class_criterion(outputs.narrow(0, 0, inputs.size(0)/2), labels_source)
         ## switch between different transfer loss
-        if loss_config["name"] == "DAN":
+        if loss_config["name"] == "DAN" or loss_config["name"] == "DAN_Linear":
             transfer_loss = transfer_criterion(features.narrow(0, 0, features.size(0)/2), features.narrow(0, features.size(0)/2, features.size(0)/2), **loss_config["params"])
         elif loss_config["name"] == "RTN":
             ## RTN is still under developing
             transfer_loss = 0
-        elif loss_config["name"] == "JAN":
+        elif loss_config["name"] == "JAN" or loss_config["name"] == "JAN_Linear":
             softmax_out = softmax_layer(outputs)
             transfer_loss = transfer_criterion([features.narrow(0, 0, features.size(0)/2), softmax_out.narrow(0, 0, softmax_out.size(0)/2)], [features.narrow(0, features.size(0)/2, features.size(0)/2), softmax_out.narrow(0, softmax_out.size(0)/2, softmax_out.size(0)/2)], **loss_config["params"])
 
+        # mmd_meter.update(transfer_loss.item(), inputs_source.size(0))
+        mmd_meter.update(transfer_loss.data[0], inputs_source.size(0))
         total_loss = loss_config["trade_off"] * transfer_loss + classifier_loss
         total_loss.backward()
         optimizer.step()
