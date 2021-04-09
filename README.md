@@ -1,4 +1,4 @@
-# Xlearn
+# Xlearn (Obsolete, upgraded to https://github.com/thuml/Transfer-Learning-Library)
 Transfer Learning Library
 
 This is the transfer learning library for the following paper:
