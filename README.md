@@ -7,6 +7,8 @@ This is the transfer learning library for the following paper:
 ### Unsupervised Domain Adaptation with Residual Transfer Networks
 ### Deep Transfer Learning with Joint Adaptation Networks
 
+The Code for 'Conditional Adversarial Domain Adaptation' is in [https://github.com/thuml/CDAN](https://github.com/thuml/CDAN)
+
 The tensorflow versions are under developing.
 
 ## Citation
